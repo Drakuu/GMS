@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { ErrorCard } from "@/components/ui/error-card";
 import { Button } from "@/components/ui/button";
@@ -29,13 +29,15 @@ const UnauthorizedIllustration = () => (
 export default function Unauthorized() {
   return (
     <ErrorCard
+      type="401"
       title="Unauthorized Access"
       description="You don't have permission to view this page. Please sign in to continue."
       code={401}
       illustration={<UnauthorizedIllustration />}
       action={
-        <Button asChild>
+        <Button asChild className="bg-white/10 hover:bg-white/20 text-white border-white/20">
           <Link href="/login">
+            <LockClosedIcon className="mr-2 h-4 w-4" />
             Sign In
             <ArrowRightIcon className="ml-2 h-4 w-4" />
           </Link>

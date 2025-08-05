@@ -28,27 +28,30 @@ const NotFoundIllustration = () => (
 
 export default function NotFound() {
   return (
-    <ErrorCard
-      title="Page Not Found"
-      description="The page you're looking for doesn't exist or has been moved."
-      code={404}
-      illustration={<NotFoundIllustration />}
-      action={
-        <div className="flex gap-4">
-          <Button asChild variant="outline" className="bg-white/10 hover:bg-white/20 border-white/20">
-            <Link href="/">
-              <HomeIcon className="mr-2 h-4 w-4" />
-              Go Home
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/contact">
-              <RocketIcon className="mr-2 h-4 w-4" />
-              Report Issue
-            </Link>
-          </Button>
-        </div>
-      }
-    />
+    <>
+      <ErrorCard
+      type="404"
+        title="Page Not Found"
+        description="The page you're looking for doesn't exist or has been moved."
+        code={404}
+        illustration={<NotFoundIllustration />}
+        action={
+          <div className="flex gap-4">
+            <Button asChild variant="outline" className="bg-white/10 hover:bg-white/20 border-white/20">
+              <Link href="/">
+                <HomeIcon className="mr-2 h-4 w-4" />
+                Go Home
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/contact">
+                <RocketIcon className="mr-2 h-4 w-4" />
+                Report Issue
+              </Link>
+            </Button>
+          </div>
+        }
+      />
+    </>
   );
 }

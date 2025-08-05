@@ -26,11 +26,12 @@ const ServerErrorIllustration = () => (
   </svg>
 );
 
-export default function ServerError() {
+export default function ServerError({ error, reset }) {
   return (
     <ErrorCard
+    type="500"
       title="Server Error"
-      description="Something went wrong on our end. We're working to fix it!"
+      description= {error.message || "Something went wrong on our end. We're working to fix it!"}
       code={500}
       illustration={<ServerErrorIllustration />}
       action={
