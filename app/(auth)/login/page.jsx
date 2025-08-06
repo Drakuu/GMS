@@ -22,7 +22,7 @@
 //           </div>
 //           <Button className="w-full">Sign In</Button>
 //         </form>
-
+        
 //         <div className="mt-4 text-center text-sm">
 //           Don't have an account?{' '}
 //           <a href="/auth/register" className="underline text-primary">
@@ -33,6 +33,7 @@
 //     </Card>
 //   );
 // }
+
 
 // app/(auth)/login/page.jsx
 'use client';
@@ -48,7 +49,6 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     // Simulate login and redirect based on role
-    // console.log(role);
     if (role === 'super-admin') router.push('/super-admin/dashboard');
     else if (role === 'admin') router.push('/admin/dashboard');
     else router.push('/user/dashboard');
