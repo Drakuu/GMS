@@ -1,6 +1,6 @@
 // app/super-admin/layout.jsx
 'use client';
-import SuperAdminSidebar from '@/components/layout/SuperAdminSidebar';
+import SuperAdminSidebar from '@/components/layout/DynamicSidebar';
 import Header from '@/components/layout/Header';
 
 export default function SuperAdminLayout({ children }) {

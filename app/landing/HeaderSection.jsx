@@ -3,9 +3,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import logo from '@/public/landing-page/logo.png'; // Replace with your actual logo path
+import logo from '@/public/landing-page/logo.png';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
+   const router = useRouter();
   return (
     <header className="absolute top-0 z-30 w-full px-8 py-6 flex justify-around items-center">
       {/* Logo */}
@@ -24,9 +26,13 @@ export default function Header() {
       </nav>
 
       {/* Contact CTA */}
+       <div className="flex gap-3">
+      <Button className="bg-primary text-black font-semibold rounded-full hover:bg-white transition px-6" onClick={() => router.push('/login')}>
+        Get Started
+      </Button>
       <Button className="bg-primary text-black font-semibold rounded-full hover:bg-white transition px-6">
         Contact
-      </Button>
+      </Button></div>
     </header>
   );
 }

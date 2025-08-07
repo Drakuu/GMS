@@ -43,14 +43,14 @@ export const ErrorCard = ({
                   {title}
                 </motion.h1>
 
-                <motion.p
+                <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6 }}
                   className="text-lg text-white/80"
                 >
                   {description}
-                </motion.p>
+                </motion.div>
 
                 {action && (
                   <motion.div
