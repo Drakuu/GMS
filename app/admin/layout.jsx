@@ -1,6 +1,6 @@
 'use client';
 import SuperAdminSidebar from '@/components/layout/SuperAdminSidebar';
-import Header from '@/components/layout/Header';
+import Header from '@/components/layout/DynamicNavbar';
 
 export default function SuperAdminLayout({ children }) {
   return (
