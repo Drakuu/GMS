@@ -1,44 +1,94 @@
-export default function Register() {
+"use client";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { 
+  signupUser, 
+  verifySignup,  // Changed from verifyOtp to verifySignup
+  resendOtp,
+  updateFormData,
+  setOtp,
+  setStep
+} from "@/store/slices/authSlice";
+import { UserDetailsForm } from "../components/UserDetailsForm";
+import { OtpVerificationForm } from "../components/OtpVerificationForm";
+import AuthLayout from '../layout';
+
+export default function SignUpPage() {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { step, formData, loading } = useSelector((state) => state.auth);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    dispatch(updateFormData({ [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await dispatch(signupUser(formData));
+  };
+
+  if (step === 2) {
+    return <OtpVerification 
+      email={formData.email} 
+      onBack={() => dispatch(setStep(1))}
+    />;
+  }
+
   return (
-    <>
-      <h1 className="text-2xl font-bold mb-6 text-center">Create Account</h1>
-      <form className="space-y-4">
-        <div>
-          <label className="block mb-1">Full Name</label>
-          <input 
-            type="text" 
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="John Doe"
-          />
-        </div>
-        <div>
-          <label className="block mb-1">Email</label>
-          <input 
-            type="email" 
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="your@email.com"
-          />
-        </div>
-        <div>
-          <label className="block mb-1">Password</label>
-          <input 
-            type="password" 
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="••••••••"
-          />
-        </div>
-        <button 
-          type="submit" 
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          Sign Up
-        </button>
-      </form>
-      <div className="mt-4 text-center">
-        <a href="/auth/login" className="text-blue-600 hover:underline">
-          Already have an account? Login
+    <AuthLayout title="Create an account">
+      <UserDetailsForm 
+        form={formData}
+        handleChange={handleChange}
+        onSubmit={handleSubmit}
+        loading={loading}
+      />
+      
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        Already have an account?{' '}
+        <a href="/auth/login" className="underline text-primary">
+          Login
         </a>
       </div>
-    </>
+    </AuthLayout>
   );
 }
+
+const OtpVerification = ({ email, onBack }) => {
+  const dispatch = useDispatch();
+  const { otp, loading } = useSelector((state) => state.auth);
+  
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    dispatch(setOtp(value));
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    await dispatch(verifySignup({ email, otp }));  // Changed to verifySignup
+  };
+
+  const handleResend = async () => {
+    await dispatch(resendOtp(email));
+  };
+
+  return (
+    <div className="space-y-4">
+      <button 
+        onClick={onBack}
+        className="text-sm text-muted-foreground hover:text-primary"
+      >
+        ← Back to signup
+      </button>
+      
+      <OtpVerificationForm
+        email={email}
+        otp={otp}
+        handleOtpChange={handleOtpChange}
+        onSubmit={handleVerify}
+        onResendOtp={handleResend}
+        loading={loading}
+      />
+    </div>
+  );
+};

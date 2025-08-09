@@ -1,84 +1,119 @@
-// // app/(auth)/login/page.jsx
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
-// import { Label } from '@/components/ui/label';
-
-// export default function LoginPage() {
-//   return (
-//     <Card>
-//       <CardHeader className="space-y-1">
-//         <CardTitle className="text-2xl">Login to your account</CardTitle>
-//       </CardHeader>
-//       <CardContent>
-//         <form className="space-y-4">
-//           <div className="space-y-2">
-//             <Label htmlFor="email">Email</Label>
-//             <Input id="email" type="email" placeholder="you@example.com" />
-//           </div>
-//           <div className="space-y-2">
-//             <Label htmlFor="password">Password</Label>
-//             <Input id="password" type="password" />
-//           </div>
-//           <Button className="w-full">Sign In</Button>
-//         </form>
-        
-//         <div className="mt-4 text-center text-sm">
-//           Don't have an account?{' '}
-//           <a href="/auth/register" className="underline text-primary">
-//             Register
-//           </a>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-
-// app/(auth)/login/page.jsx
-'use client';
-'use client';
-
+"use client";
 import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser, verifyLogin } from '@/store/slices/authSlice';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import AuthLayout from '../layout';
 import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('super-admin');
+  const dispatch = useDispatch();
+  const { step, loading } = useSelector((state) => state.auth);
+  const [formData, setFormData] = useState({ email: '', password: '' });
 
-  const handleLogin = () => {
-    // Simulate login and redirect based on role
-    if (role === 'super-admin') router.push('/super-admin/dashboard');
-    else if (role === 'admin') router.push('/admin/dashboard');
-    else router.push('/user/dashboard');
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await dispatch(loginUser(formData));
+  };
+
+  if (step === 2) {
+    return <OtpVerification 
+      email={formData.email} 
+      onBack={() => dispatch(setStep(1))}
+    />;
+  }
+
+  return (
+    <AuthLayout title="Login to your account">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing In...
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </form>
+      
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        Don't have an account?{' '}
+        <a href="/signup" className="underline text-primary">
+          Register
+        </a>
+      </div>
+    </AuthLayout>
+  );
+}
+
+const OtpVerification = ({ email, onBack }) => {
+  const dispatch = useDispatch();
+  const { otp, loading } = useSelector((state) => state.auth);
+  
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    dispatch(setOtp(value));
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    await dispatch(verifyLogin({ email, otp }));
+  };
+
+  const handleResend = async () => {
+    await dispatch(resendOtp(email));
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-50">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border mb-2 rounded"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <select
-          className="w-full p-2 border mb-4 rounded"
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <option value="super-admin">Super Admin</option>
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-        </select>
-        <button
-          className="bg-black text-white w-full py-2 rounded hover:bg-gray-800"
-          onClick={handleLogin}
-        >
-          Login
-        </button>
-      </div>
+    <div className="space-y-4">
+      <button 
+        onClick={onBack}
+        className="text-sm text-muted-foreground hover:text-primary"
+      >
+        ← Back to login
+      </button>
+      
+      <OtpVerificationForm
+        email={email}
+        otp={otp}
+        handleOtpChange={handleOtpChange}
+        onSubmit={handleVerify}
+        onResendOtp={handleResend}
+        loading={loading}
+      />
     </div>
   );
-}
+};
