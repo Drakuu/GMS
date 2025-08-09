@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import User from '@/models/user.model';
+import User from '@/models/user.model.js';
 import connectDB from '@/utils/connectDB';
 import { generateOTP, generateToken } from '@/utils/authUtils';
 

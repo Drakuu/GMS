@@ -13,8 +13,9 @@ const userSchema = new mongoose.Schema({
   last_login: { type: Date },
   isDeleted: { type: Boolean }
 }, {
-   timestamps: true,
+  timestamps: true,
 });
 
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-export default mongoose.models.User || mongoose.model("User", userSchema);
+export default User;

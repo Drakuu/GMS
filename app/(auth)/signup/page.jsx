@@ -1,9 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { 
-  signupUser, 
-  verifySignup,  // Changed from verifyOtp to verifySignup
+import {
+  signupUser,
+  verifySignup,
   resendOtp,
   updateFormData,
   setOtp,
@@ -16,7 +16,7 @@ import AuthLayout from '../layout';
 export default function SignUpPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { step, formData, loading } = useSelector((state) => state.auth);
+  const { step, formData, loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,26 +24,47 @@ export default function SignUpPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    await dispatch(signupUser(formData));
+  e.preventDefault();
+
+  const signupData = {
+    user_name: formData.name,
+    user_email: formData.email,
+    user_password: formData.password,
+    user_phone: formData.phone
   };
 
+  if (formData.role?.trim()) signupData.user_role = formData.role;
+  if (formData.gymId) signupData.gym_id = formData.gymId;
+
+  console.log("Final form data before submission:", signupData);
+  
+  try {
+    const result = await dispatch(signupUser(signupData));
+    if (result.error) {
+      console.error("Signup failed:", result.error);
+    }
+  } catch (error) {
+    console.error("Signup error:", error);
+  }
+};
+
   if (step === 2) {
-    return <OtpVerification 
-      email={formData.email} 
+    return <OtpVerification
+      email={formData.email}
       onBack={() => dispatch(setStep(1))}
     />;
   }
 
   return (
     <AuthLayout title="Create an account">
-      <UserDetailsForm 
+      <UserDetailsForm
         form={formData}
         handleChange={handleChange}
         onSubmit={handleSubmit}
         loading={loading}
+        error={error}
       />
-      
+
       <div className="mt-4 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
         <a href="/auth/login" className="underline text-primary">
@@ -56,31 +77,52 @@ export default function SignUpPage() {
 
 const OtpVerification = ({ email, onBack }) => {
   const dispatch = useDispatch();
-  const { otp, loading } = useSelector((state) => state.auth);
-  
+  const { otp, loading, error } = useSelector((state) => state.auth);
+
   const handleOtpChange = (e) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     dispatch(setOtp(value));
   };
 
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    await dispatch(verifySignup({ email, otp }));  // Changed to verifySignup
-  };
+const handleVerify = async (e) => {
+  e.preventDefault();
+  
+  if (!otp || otp.length !== 6) {
+    console.error("Invalid OTP length");
+    return;
+  }
 
+  console.log("Attempting verification with:", {
+    user_email: email,
+    user_otp: otp
+  });
+
+  try {
+    const result = await dispatch(verifySignup({ 
+      user_email: email, 
+      user_otp: otp 
+    }));
+    
+    if (result.error) {
+      console.error("Verification failed:", result.error);
+    }
+  } catch (error) {
+    console.error("Verification error:", error);
+  }
+};
   const handleResend = async () => {
-    await dispatch(resendOtp(email));
+    await dispatch(resendOtp({ user_email: email }));
   };
 
   return (
     <div className="space-y-4">
-      <button 
+      <button
         onClick={onBack}
         className="text-sm text-muted-foreground hover:text-primary"
       >
         ← Back to signup
       </button>
-      
+
       <OtpVerificationForm
         email={email}
         otp={otp}
@@ -88,6 +130,7 @@ const OtpVerification = ({ email, onBack }) => {
         onSubmit={handleVerify}
         onResendOtp={handleResend}
         loading={loading}
+        error={error}
       />
     </div>
   );

@@ -6,46 +6,71 @@ import { toast } from 'sonner';
 // Helper functions for safe localStorage access
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('jwtlogintoken') || null;
+    return localStorage.getItem('auth-token') || null;
   }
   return null;
 };
 
 const setAuthToken = (token) => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('jwtlogintoken', token);
+    localStorage.setItem('auth-token', token);
   }
 };
 
 const removeAuthToken = () => {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('jwtlogintoken');
+    localStorage.removeItem('auth-token');
+    localStorage.removeItem('otp-verification-token');
   }
-};
-
-// Axios headers configuration
-const getAuthHeaders = () => {
-  const jwtLoginToken = getAuthToken();
-  return {
-    'Content-Type': 'application/json',
-    ...(jwtLoginToken && { 'Authorization': `Bearer ${jwtLoginToken}` })
-  };
 };
 
 // Configure axios instance
 const authAxios = axios.create({
   baseURL: '/auth',
-  headers: getAuthHeaders()
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
+
+// Update axios headers with token
+const updateAxiosHeaders = (token) => {
+  if (token) {
+    authAxios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete authAxios.defaults.headers.common['Authorization'];
+  }
+};
+
+// Initialize headers
+updateAxiosHeaders(getAuthToken());
 
 // Async thunks using axios
 export const signupUser = createAsyncThunk(
   'auth/signup',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/signup', userData);
-      return { email: userData.email };
+      // Create clean payload with only defined values
+      const payload = {
+        user_name: userData.user_name,
+        user_email: userData.user_email,
+        user_password: userData.user_password,
+        user_phone: userData.user_phone
+      };
+
+      // Only add optional fields if they exist
+      if (userData.user_role) payload.user_role = userData.user_role;
+      if (userData.gym_id) payload.gym_id = userData.gym_id;
+
+      console.log("Final signup payload:", payload);
+
+      const response = await authAxios.post('/signup', payload);
+      return {
+        user_email: userData.user_email,
+        otp: response.data.user_otp,
+        otp_expiry: response.data.user_otp_expiry
+      };
     } catch (error) {
+      console.error("Signup error details:", error.response?.data);
       return rejectWithValue(error.response?.data?.message || 'Signup failed');
     }
   }
@@ -53,39 +78,92 @@ export const signupUser = createAsyncThunk(
 
 export const verifySignup = createAsyncThunk(
   'auth/verifySignup',
-  async ({ email, otp }, { rejectWithValue }) => {
+  async ({ user_email, user_otp }, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/verify-signup', { email, otp });
+      console.log("Verifying OTP for:", user_email, "with OTP:", user_otp);
+
+      const response = await authAxios.post('/verify-signup', {
+        user_email,
+        user_otp
+      });
+
+      console.log("Verification response:", response.data);
+
       if (response.data.token) {
         setAuthToken(response.data.token);
+        updateAxiosHeaders(response.data.token);
       }
-      return response.data;
+      return {
+        user: response.data.user,
+        token: response.data.token
+      };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Verification failed');
+      console.error("Verification error:", error.response?.data);
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Verification failed'
+      );
     }
   }
 );
 
+// Update the loginUser thunk
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/login', credentials);
-      return { email: credentials.email };
+      const response = await authAxios.post('/login', {
+        user_email: credentials.user_email,
+        user_password: credentials.user_password
+      });
+      
+      // Set the temporary verification token from response
+      if (response.headers['set-cookie']) {
+        const tempToken = response.headers['set-cookie']
+          .find(c => c.includes('otp-verification-token'))
+          ?.split(';')[0]
+          .split('=')[1];
+        if (tempToken) {
+          localStorage.setItem('otp-verification-token', tempToken);
+        }
+      }
+      
+      return {
+        user_email: credentials.user_email,
+        otp: response.data.user_otp,
+        otp_expiry: response.data.user_otp_expiry
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
 
+// Update verifyLogin thunk
 export const verifyLogin = createAsyncThunk(
   'auth/verifyLogin',
-  async ({ email, otp }, { rejectWithValue }) => {
+  async ({ user_email, otp }, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/verify-login', { email, otp });
+      const tempToken = localStorage.getItem('otp-verification-token');
+      if (!tempToken) {
+        throw new Error('Session expired. Please login again.');
+      }
+
+      const response = await authAxios.post('/verify-login', {
+        user_email,
+        otp
+      }, {
+        headers: {
+          'Cookie': `otp-verification-token=${tempToken}`
+        }
+      });
+
       if (response.data.token) {
         setAuthToken(response.data.token);
+        localStorage.removeItem('otp-verification-token');
       }
+      
       return response.data.user;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Verification failed');
@@ -97,8 +175,14 @@ export const resendOtp = createAsyncThunk(
   'auth/resendOtp',
   async (email, { rejectWithValue }) => {
     try {
-      await authAxios.post('/resend-otp', { email });
-      return { email };
+      const response = await authAxios.post('/resend-otp', {
+        user_email: email
+      });
+      return {
+        email,
+        otp: response.data.user_otp, // For development only
+        otp_expiry: response.data.user_otp_expiry
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to resend OTP');
     }
@@ -115,7 +199,7 @@ const initialState = {
     email: '',
     password: '',
     phone: '',
-    role: 'member',
+    role: '',
     gymId: null
   },
   otp: '',
@@ -138,15 +222,12 @@ const authSlice = createSlice({
     setToken: (state, action) => {
       state.token = action.payload;
       setAuthToken(action.payload);
-      // Update axios headers with new token
-      authAxios.defaults.headers = getAuthHeaders();
+      updateAxiosHeaders(action.payload);
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       removeAuthToken();
-      // Clear axios auth header
-      delete authAxios.defaults.headers['Authorization'];
     },
     resetAuth: () => initialState
   },
@@ -234,13 +315,13 @@ const authSlice = createSlice({
   }
 });
 
-export const { 
-  setStep, 
-  updateFormData, 
-  setOtp, 
-  setToken, 
-  logout, 
-  resetAuth 
+export const {
+  setStep,
+  updateFormData,
+  setOtp,
+  setToken,
+  logout,
+  resetAuth
 } = authSlice.actions;
 
 export default authSlice.reducer;

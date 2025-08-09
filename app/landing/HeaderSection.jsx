@@ -12,7 +12,7 @@ export default function Header() {
     <header className="absolute top-0 z-30 w-full px-8 py-6 flex justify-around items-center">
       {/* Logo */}
       <div className="flex items-center gap-2">
-        <Image src={logo} alt="Logo" width={70} height={70} />
+        <Image className='h-auto' src={logo} alt="Logo" width={70} height={70} />
       </div>
 
       {/* Navigation */}

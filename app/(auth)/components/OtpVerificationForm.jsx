@@ -10,7 +10,8 @@ export function OtpVerificationForm({
   handleOtpChange, 
   onSubmit, 
   onResendOtp, 
-  loading 
+  loading,
+  error
 }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -34,6 +35,10 @@ export function OtpVerificationForm({
           className="text-center text-xl tracking-widest"
         />
       </div>
+
+      {error && (
+        <div className="text-red-500 text-sm">{error}</div>
+      )}
 
       <Button
         type="submit"

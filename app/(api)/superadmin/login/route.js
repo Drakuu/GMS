@@ -1,4 +1,4 @@
-import { SUPERADMIN } from "../../../../config/superadmin";
+import { SUPERADMIN } from "@/config/superadmin";
 
 export async function POST(req) {
   const { email, password } = await req.json();
