@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import User from '@/models/user.model';
-import connectDB from '@/utils/connectDB';
+import connectDB from '@/lib/connectDB';
 import { generateOTP } from '@/utils/authUtils';
 
 export async function POST(req) {

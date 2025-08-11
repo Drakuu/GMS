@@ -1,8 +1,7 @@
-const User = require("./user.model");
+import User from './user.model';
 
-const Hospital = {
-    User,
-    
+const Models = {
+  User
 };
 
-module.exports = Hospital;
+export default Models;

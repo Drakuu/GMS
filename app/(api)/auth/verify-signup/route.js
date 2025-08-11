@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import User from '@/models/user.model';
-import connectDB from '@/utils/connectDB';
+import connectDB from '@/lib/connectDB';
 import { generateToken } from '@/utils/authUtils';
 
 export async function POST(req) {
@@ -10,7 +10,7 @@ export async function POST(req) {
     // Validation
     if (!user_email || !user_otp) {
       return NextResponse.json(
-        { 
+        {
           success: false,
           message: "Email and OTP are required",
           errors: {
@@ -25,13 +25,13 @@ export async function POST(req) {
     await connectDB();
 
     // Find user with case-insensitive email match
-    const user = await User.findOne({ 
-      user_email: { $regex: new RegExp(`^${user_email}$`, 'i') } 
+    const user = await User.findOne({
+      user_email: { $regex: new RegExp(`^${user_email}$`, 'i') }
     });
 
     if (!user) {
       return NextResponse.json(
-        { 
+        {
           success: false,
           message: "User not found",
           error: "No account exists with this email"
@@ -43,7 +43,7 @@ export async function POST(req) {
     // OTP verification
     if (user.user_otp !== user_otp) {
       return NextResponse.json(
-        { 
+        {
           success: false,
           message: "Invalid OTP",
           error: "The OTP you entered is incorrect"
@@ -55,7 +55,7 @@ export async function POST(req) {
     // OTP expiry check
     if (user.user_otp_expiry < Date.now()) {
       return NextResponse.json(
-        { 
+        {
           success: false,
           message: "OTP expired",
           error: "The OTP has expired. Please request a new one"
@@ -94,10 +94,10 @@ export async function POST(req) {
   } catch (error) {
     console.error("Verification error:", error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         message: "Verification failed",
-        error: error.message 
+        error: error.message
       },
       { status: 500 }
     );

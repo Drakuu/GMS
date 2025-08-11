@@ -1,4 +1,4 @@
-import  connectDB  from "../../../utils/connectDB";
+import connectDB from "../../../lib/connectDB";
 import Trainer from "@/models/trainermodel";
 import { NextResponse } from "next/server";
 //import { getServerSession } from "next-auth";
@@ -9,8 +9,8 @@ await connectDB();
 
 // Helper function to check admin role
 //const isAdmin = async (req) => {
-  //const session = await getServerSession(authOptions);
-  //return session?.user?.role === "admin";
+//const session = await getServerSession(authOptions);
+//return session?.user?.role === "admin";
 //};
 
 // GET all trainers
@@ -25,7 +25,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const gymId = searchParams.get('gymId');
-    
+
     let query = {};
     if (gymId) query.gymId = gymId;
 
@@ -45,10 +45,10 @@ export async function GET(request) {
 // POST create new trainer
 export async function POST(request) {
   //if (!(await isAdmin(request))) {
-   // return NextResponse.json(
-      //{ error: "Unauthorized access" },
-      //{ status: 403 }
-    //);
+  // return NextResponse.json(
+  //{ error: "Unauthorized access" },
+  //{ status: 403 }
+  //);
   //}
 
   try {

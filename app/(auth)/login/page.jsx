@@ -27,6 +27,11 @@ export default function LoginPage() {
     user_password: ''
   });
 
+  // Reset to step 1 when component mounts
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));

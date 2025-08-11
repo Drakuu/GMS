@@ -6,14 +6,24 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { useRouter } from 'next/navigation';
+import { logout } from '@/store/slices/authSlice';
 
 export default function DynamicNavbar({ role }) {
+  const router = useRouter();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const userRole = user?.user_role?.toLowerCase() || role?.toLowerCase();
 
+  const handleLogout = (e) => {
+  e.preventDefault();
+  dispatch(logout()); // Dispatch the sync action
+  router.push('/login');
+};
+
   if (!userRole) {
-    return null; // Or a loading state
+    return null;
   }
 
   const dashboardTitles = {
@@ -28,7 +38,7 @@ export default function DynamicNavbar({ role }) {
         <div className="font-bold text-xl">
           {dashboardTitles[userRole] || 'Dashboard'}
         </div>
-        
+
         <nav className="flex items-center justify-between gap-4 w-full">
           {/* Search bar */}
           <div className="flex-1 max-w-md">
@@ -78,8 +88,8 @@ export default function DynamicNavbar({ role }) {
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive" asChild>
-                  <Link href="/logout">Logout</Link>
+                <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+                  Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

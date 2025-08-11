@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/user.model.js';
-import connectDB from '@/utils/connectDB';
+import connectDB from '@/lib/connectDB';
 import { generateOTP, generateToken } from '@/utils/authUtils';
 
 export async function POST(req) {
@@ -52,7 +52,7 @@ export async function POST(req) {
     const token = generateToken(newUser);
 
     return NextResponse.json(
-      { 
+      {
         success: true,
         message: "OTP sent to email",
         data: {
@@ -71,10 +71,10 @@ export async function POST(req) {
   } catch (err) {
     console.error("Signup error:", err);
     return NextResponse.json(
-      { 
+      {
         success: false,
-        message: "Server error", 
-        error: err.message 
+        message: "Server error",
+        error: err.message
       },
       { status: 500 }
     );

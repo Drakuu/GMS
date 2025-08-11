@@ -143,18 +143,22 @@ __turbopack_context__.s({
     "default": ()=>__TURBOPACK__default__export__
 });
 var __TURBOPACK__imported__module__$5b$externals$5d2f$mongoose__$5b$external$5d$__$28$mongoose$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/mongoose [external] (mongoose, cjs)");
+(()=>{
+    const e = new Error("Cannot find module './initialSetup'");
+    e.code = 'MODULE_NOT_FOUND';
+    throw e;
+})();
+;
 ;
 const connectDB = async ()=>{
-    if (__TURBOPACK__imported__module__$5b$externals$5d2f$mongoose__$5b$external$5d$__$28$mongoose$2c$__cjs$29$__["default"].connections[0].readyState) {
-        console.log('✅ Already connected to MongoDB');
-        return;
-    }
     try {
         const conn = await __TURBOPACK__imported__module__$5b$externals$5d2f$mongoose__$5b$external$5d$__$28$mongoose$2c$__cjs$29$__["default"].connect(process.env.MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
         console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+        // Check and create SuperAdmin after connection
+        await createSuperAdmin();
     } catch (error) {
         console.error('❌ MongoDB connection error:', error.message);
         process.exit(1);

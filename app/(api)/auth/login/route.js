@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import User from '@/models/user.model';
-import connectDB from '@/utils/connectDB';
+import Models from '@/models';
+import connectDB from '@/lib/connectDB';
 import { generateOTP, createTempToken } from '@/utils/authUtils';
 
 export async function POST(req) {
@@ -18,7 +18,7 @@ export async function POST(req) {
     await connectDB();
 
     // Find user by user_email
-    const user = await User.findOne({ user_email });
+    const user = await Models.User.findOne({ user_email });
     if (!user) {
       return NextResponse.json(
         { message: "Invalid credentials" },
@@ -57,7 +57,7 @@ export async function POST(req) {
 
     // Return response including OTP & expiry (for testing; remove in production)
     const response = NextResponse.json(
-      { 
+      {
         message: "OTP sent to email",
         user_otp: otp,
         user_otp_expiry: expiryTime
