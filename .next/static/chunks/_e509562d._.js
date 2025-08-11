@@ -46,7 +46,7 @@ var _s = __turbopack_context__.k.signature();
 function ProtectedRoute(param) {
     let { children, allowedRoles } = param;
     _s();
-    const { user, token, loading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"])({
+    const { user, loading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"])({
         "ProtectedRoute.useSelector": (state)=>state.auth
     }["ProtectedRoute.useSelector"]);
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
@@ -54,6 +54,8 @@ function ProtectedRoute(param) {
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "ProtectedRoute.useEffect": ()=>{
             if (!loading) {
+                // Get token directly from localStorage for the check
+                const token = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('auth-token') : "TURBOPACK unreachable";
                 console.log('ProtectedRoute check - token:', token, 'role:', user === null || user === void 0 ? void 0 : user.user_role);
                 if (!token) {
                     console.log('No token, redirecting to login');
@@ -62,28 +64,10 @@ function ProtectedRoute(param) {
                     console.log('Role not allowed, redirecting to unauthorized');
                     router.push('/unauthorized');
                 }
-            }
-        }
-    }["ProtectedRoute.useEffect"], [
-        token,
-        user,
-        allowedRoles,
-        router,
-        loading
-    ]);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "ProtectedRoute.useEffect": ()=>{
-            if (!loading) {
-                if (!token) {
-                    router.push('/login');
-                } else if (allowedRoles && !allowedRoles.includes(user === null || user === void 0 ? void 0 : user.user_role)) {
-                    router.push('/unauthorized');
-                }
                 setIsChecking(false);
             }
         }
     }["ProtectedRoute.useEffect"], [
-        token,
         user,
         allowedRoles,
         router,
@@ -96,21 +80,23 @@ function ProtectedRoute(param) {
                 className: "h-8 w-8 animate-spin"
             }, void 0, false, {
                 fileName: "[project]/app/ProtectedRoute.js",
-                lineNumber: 40,
+                lineNumber: 34,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/ProtectedRoute.js",
-            lineNumber: 39,
+            lineNumber: 33,
             columnNumber: 7
         }, this);
     }
+    // Final check using localStorage directly
+    const token = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('auth-token') : "TURBOPACK unreachable";
     if (!token || allowedRoles && !allowedRoles.includes(user === null || user === void 0 ? void 0 : user.user_role)) {
         return null;
     }
     return children;
 }
-_s(ProtectedRoute, "SXYlVKrxJOl5RKKJDL8tk4BO9gQ=", false, function() {
+_s(ProtectedRoute, "5LWD7FsSy2/yAPFT6jWYGZKxgZk=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"],
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
@@ -810,7 +796,7 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 var { k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
 __turbopack_context__.s({
-    "default": ()=>SuperAdminSidebar
+    "default": ()=>DynamicSidebar
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$routes$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/routes.js [app-client] (ecmascript)");
@@ -819,6 +805,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$avatar$2
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/button.jsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$scroll$2d$area$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/scroll-area.jsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$separator$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/separator.jsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-redux/dist/react-redux.mjs [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 'use client';
@@ -829,17 +816,25 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-function SuperAdminSidebar() {
+;
+function DynamicSidebar() {
+    var _user_user_role, _user_user_name;
     _s();
     const pathname = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"])();
-    const role = 'super-admin'; // This should be dynamically set based on user role
+    const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"])({
+        "DynamicSidebar.useSelector": (state)=>state.auth
+    }["DynamicSidebar.useSelector"]);
+    const role = user === null || user === void 0 ? void 0 : (_user_user_role = user.user_role) === null || _user_user_role === void 0 ? void 0 : _user_user_role.toLowerCase(); // Get role from Redux auth state
+    if (!role) {
+        return null; // Or a loading state
+    }
     const { mainSections, bottomSection } = __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$routes$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SIDEBAR_ROUTES"][role] || {
         mainSections: [],
         bottomSection: {
             items: []
         }
     };
-    console.log('role is', role);
+    console.log('the role is', role);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -847,7 +842,7 @@ function SuperAdminSidebar() {
                 "aria-hidden": "true"
             }, void 0, false, {
                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                lineNumber: 23,
+                lineNumber: 29,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -863,7 +858,7 @@ function SuperAdminSidebar() {
                                     children: "click"
                                 }, void 0, false, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 30,
+                                    lineNumber: 36,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -871,18 +866,18 @@ function SuperAdminSidebar() {
                                     children: " fitness"
                                 }, void 0, false, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 31,
+                                    lineNumber: 37,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                            lineNumber: 29,
+                            lineNumber: 35,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 28,
+                        lineNumber: 34,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$scroll$2d$area$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ScrollArea"], {
@@ -895,7 +890,7 @@ function SuperAdminSidebar() {
                                         children: section.title
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                        lineNumber: 39,
+                                        lineNumber: 45,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -913,45 +908,45 @@ function SuperAdminSidebar() {
                                                                 children: item.icon
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                                lineNumber: 53,
+                                                                lineNumber: 59,
                                                                 columnNumber: 25
                                                             }, this),
                                                             item.name
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                        lineNumber: 52,
+                                                        lineNumber: 58,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                    lineNumber: 45,
+                                                    lineNumber: 51,
                                                     columnNumber: 21
                                                 }, this)
                                             }, item.path, false, {
                                                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                lineNumber: 44,
+                                                lineNumber: 50,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                        lineNumber: 42,
+                                        lineNumber: 48,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, section.title, true, {
                                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                lineNumber: 38,
+                                lineNumber: 44,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 36,
+                        lineNumber: 42,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$separator$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Separator"], {}, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 66,
+                        lineNumber: 72,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -971,39 +966,39 @@ function SuperAdminSidebar() {
                                                     children: item.icon
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                    lineNumber: 81,
+                                                    lineNumber: 87,
                                                     columnNumber: 21
                                                 }, this),
                                                 item.name
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                            lineNumber: 80,
+                                            lineNumber: 86,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                        lineNumber: 73,
+                                        lineNumber: 79,
                                         columnNumber: 17
                                     }, this)
                                 }, item.path, false, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 72,
+                                    lineNumber: 78,
                                     columnNumber: 15
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                            lineNumber: 70,
+                            lineNumber: 76,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 69,
+                        lineNumber: 75,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$separator$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Separator"], {}, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 90,
+                        lineNumber: 96,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1014,78 +1009,79 @@ function SuperAdminSidebar() {
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$avatar$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Avatar"], {
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$avatar$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarImage"], {
-                                            src: "/avatars/john-smith.png"
+                                            src: "/avatars/default.png"
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                            lineNumber: 96,
+                                            lineNumber: 102,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$avatar$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                             className: "bg-muted",
-                                            children: "JS"
+                                            children: (user === null || user === void 0 ? void 0 : (_user_user_name = user.user_name) === null || _user_user_name === void 0 ? void 0 : _user_user_name.charAt(0)) || 'U'
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                            lineNumber: 97,
+                                            lineNumber: 103,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 95,
+                                    lineNumber: 101,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-sm font-medium",
-                                            children: "John Smith"
+                                            children: (user === null || user === void 0 ? void 0 : user.user_name) || 'User'
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                            lineNumber: 100,
+                                            lineNumber: 108,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                            className: "text-xs text-muted-foreground",
-                                            children: "Gym Manager"
+                                            className: "text-xs text-muted-foreground capitalize",
+                                            children: role.replace('-', ' ')
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                            lineNumber: 101,
+                                            lineNumber: 109,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 99,
+                                    lineNumber: 107,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                            lineNumber: 94,
+                            lineNumber: 100,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 93,
+                        lineNumber: 99,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                lineNumber: 26,
+                lineNumber: 32,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true);
 }
-_s(SuperAdminSidebar, "xbyQPtUVMO7MNj7WjJlpdWqRcTo=", false, function() {
+_s(DynamicSidebar, "ricw/FKaDBMr0MQ0gNzeT4lsOzU=", false, function() {
     return [
-        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"]
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"]
     ];
 });
-_c = SuperAdminSidebar;
+_c = DynamicSidebar;
 var _c;
-__turbopack_context__.k.register(_c, "SuperAdminSidebar");
+__turbopack_context__.k.register(_c, "DynamicSidebar");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
 }
@@ -1521,6 +1517,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$avatar$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/avatar.jsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/badge.jsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$dropdown$2d$menu$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/ui/dropdown-menu.jsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-redux/dist/react-redux.mjs [app-client] (ecmascript)");
+;
+var _s = __turbopack_context__.k.signature();
 'use client';
 ;
 ;
@@ -1532,6 +1531,20 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$dropdown
 ;
 function DynamicNavbar(param) {
     let { role } = param;
+    var _user_user_role, _user_user_name;
+    _s();
+    const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"])({
+        "DynamicNavbar.useSelector": (state)=>state.auth
+    }["DynamicNavbar.useSelector"]);
+    const userRole = (user === null || user === void 0 ? void 0 : (_user_user_role = user.user_role) === null || _user_user_role === void 0 ? void 0 : _user_user_role.toLowerCase()) || (role === null || role === void 0 ? void 0 : role.toLowerCase());
+    if (!userRole) {
+        return null; // Or a loading state
+    }
+    const dashboardTitles = {
+        'super-admin': 'Super Admin Dashboard',
+        'admin': 'Admin Dashboard',
+        'user': 'User Dashboard'
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("header", {
         className: "bg-background border-b p-4 sticky top-0 z-50",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1539,14 +1552,10 @@ function DynamicNavbar(param) {
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "font-bold text-xl",
-                    children: [
-                        role === 'super-admin' && 'Super Admin Dashboard',
-                        role === 'admin' && 'Admin Dashboard',
-                        role === 'user' && 'User Dashboard'
-                    ]
-                }, void 0, true, {
+                    children: dashboardTitles[userRole] || 'Dashboard'
+                }, void 0, false, {
                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                    lineNumber: 14,
+                    lineNumber: 28,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -1561,7 +1570,7 @@ function DynamicNavbar(param) {
                                         className: "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                        lineNumber: 24,
+                                        lineNumber: 36,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1570,18 +1579,18 @@ function DynamicNavbar(param) {
                                         className: "pl-8 w-full"
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                        lineNumber: 25,
+                                        lineNumber: 37,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                lineNumber: 23,
+                                lineNumber: 35,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                            lineNumber: 22,
+                            lineNumber: 34,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1597,7 +1606,7 @@ function DynamicNavbar(param) {
                                             className: "text-muted-foreground"
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                            lineNumber: 37,
+                                            lineNumber: 49,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1605,13 +1614,13 @@ function DynamicNavbar(param) {
                                             children: "3"
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                            lineNumber: 38,
+                                            lineNumber: 50,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                    lineNumber: 36,
+                                    lineNumber: 48,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1624,7 +1633,7 @@ function DynamicNavbar(param) {
                                             className: "text-muted-foreground"
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                            lineNumber: 43,
+                                            lineNumber: 55,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1632,13 +1641,13 @@ function DynamicNavbar(param) {
                                             children: "1"
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                            lineNumber: 44,
+                                            lineNumber: 56,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                    lineNumber: 42,
+                                    lineNumber: 54,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$dropdown$2d$menu$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenu"], {
@@ -1656,46 +1665,46 @@ function DynamicNavbar(param) {
                                                                 src: "/avatars/default.png"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                                lineNumber: 52,
+                                                                lineNumber: 64,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$avatar$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                                 className: "bg-muted",
-                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__["User"], {
+                                                                children: (user === null || user === void 0 ? void 0 : (_user_user_name = user.user_name) === null || _user_user_name === void 0 ? void 0 : _user_user_name.charAt(0)) || /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__["User"], {
                                                                     size: 16
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                                    lineNumber: 54,
-                                                                    columnNumber: 23
+                                                                    lineNumber: 66,
+                                                                    columnNumber: 54
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                                lineNumber: 53,
+                                                                lineNumber: 65,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                        lineNumber: 51,
+                                                        lineNumber: 63,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         className: "hidden md:inline text-sm",
-                                                        children: "John"
+                                                        children: (user === null || user === void 0 ? void 0 : user.user_name) || 'User'
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                        lineNumber: 57,
+                                                        lineNumber: 69,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                lineNumber: 50,
+                                                lineNumber: 62,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                            lineNumber: 49,
+                                            lineNumber: 61,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$dropdown$2d$menu$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuContent"], {
@@ -1708,12 +1717,12 @@ function DynamicNavbar(param) {
                                                         children: "Profile"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                        lineNumber: 62,
+                                                        lineNumber: 76,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                    lineNumber: 61,
+                                                    lineNumber: 75,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$dropdown$2d$menu$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -1723,12 +1732,12 @@ function DynamicNavbar(param) {
                                                         children: "Settings"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                        lineNumber: 65,
+                                                        lineNumber: 79,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                    lineNumber: 64,
+                                                    lineNumber: 78,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$dropdown$2d$menu$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -1739,50 +1748,55 @@ function DynamicNavbar(param) {
                                                         children: "Logout"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                        lineNumber: 68,
+                                                        lineNumber: 82,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                                    lineNumber: 67,
+                                                    lineNumber: 81,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                            lineNumber: 60,
+                                            lineNumber: 74,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                                    lineNumber: 48,
+                                    lineNumber: 60,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                            lineNumber: 34,
+                            lineNumber: 46,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/layout/DynamicNavbar.jsx",
-                    lineNumber: 20,
+                    lineNumber: 32,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/layout/DynamicNavbar.jsx",
-            lineNumber: 13,
+            lineNumber: 27,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/layout/DynamicNavbar.jsx",
-        lineNumber: 12,
+        lineNumber: 26,
         columnNumber: 5
     }, this);
 }
+_s(DynamicNavbar, "HA6wZhGeXNR9tzJ3aDGGsGCdOyI=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"]
+    ];
+});
 _c = DynamicNavbar;
 var _c;
 __turbopack_context__.k.register(_c, "DynamicNavbar");

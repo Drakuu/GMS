@@ -228,7 +228,7 @@ const initialState = {
     gymId: null
   },
   otp: '',
-  token: getAuthToken()
+  token: typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null
 };
 
 const authSlice = createSlice({

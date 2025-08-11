@@ -6,15 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useSelector } from 'react-redux';
 
 export default function DynamicNavbar({ role }) {
+  const { user } = useSelector((state) => state.auth);
+  const userRole = user?.user_role?.toLowerCase() || role?.toLowerCase();
+
+  if (!userRole) {
+    return null; // Or a loading state
+  }
+
+  const dashboardTitles = {
+    'super-admin': 'Super Admin Dashboard',
+    'admin': 'Admin Dashboard',
+    'user': 'User Dashboard'
+  };
+
   return (
     <header className="bg-background border-b p-4 sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="font-bold text-xl">
-          {role === 'super-admin' && 'Super Admin Dashboard'}
-          {role === 'admin' && 'Admin Dashboard'}
-          {role === 'user' && 'User Dashboard'}
+          {dashboardTitles[userRole] || 'Dashboard'}
         </div>
         
         <nav className="flex items-center justify-between gap-4 w-full">
@@ -51,10 +63,12 @@ export default function DynamicNavbar({ role }) {
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/avatars/default.png" />
                     <AvatarFallback className="bg-muted">
-                      <User size={16} />
+                      {user?.user_name?.charAt(0) || <User size={16} />}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:inline text-sm">John</span>
+                  <span className="hidden md:inline text-sm">
+                    {user?.user_name || 'User'}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

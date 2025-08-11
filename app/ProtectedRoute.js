@@ -5,34 +5,28 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const { user, token, loading } = useSelector((state) => state.auth);
+  const { user, loading } = useSelector((state) => state.auth);
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
-  useEffect(() => {
-  if (!loading) {
-    console.log('ProtectedRoute check - token:', token, 'role:', user?.user_role);
-    
-    if (!token) {
-      console.log('No token, redirecting to login');
-      router.push('/login');
-    } 
-    else if (allowedRoles && !allowedRoles.includes(user?.user_role)) {
-      console.log('Role not allowed, redirecting to unauthorized');
-      router.push('/unauthorized');
-    }
-  }
-}, [token, user, allowedRoles, router, loading]);
 
   useEffect(() => {
-    if (!loading) { // Wait until auth state is loaded
+    if (!loading) {
+      // Get token directly from localStorage for the check
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
+      
+      console.log('ProtectedRoute check - token:', token, 'role:', user?.user_role);
+      
       if (!token) {
+        console.log('No token, redirecting to login');
         router.push('/login');
-      } else if (allowedRoles && !allowedRoles.includes(user?.user_role)) {
+      } 
+      else if (allowedRoles && !allowedRoles.includes(user?.user_role)) {
+        console.log('Role not allowed, redirecting to unauthorized');
         router.push('/unauthorized');
       }
       setIsChecking(false);
     }
-  }, [token, user, allowedRoles, router, loading]);
+  }, [user, allowedRoles, router, loading]);
 
   if (loading || isChecking) {
     return (
@@ -42,6 +36,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     );
   }
 
+  // Final check using localStorage directly
+  const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
   if (!token || (allowedRoles && !allowedRoles.includes(user?.user_role))) {
     return null;
   }

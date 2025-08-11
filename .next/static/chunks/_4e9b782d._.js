@@ -208,7 +208,7 @@ const initialState = {
         gymId: null
     },
     otp: '',
-    token: getAuthToken()
+    token: ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('auth-token') : "TURBOPACK unreachable"
 };
 const authSlice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createSlice"])({
     name: 'auth',

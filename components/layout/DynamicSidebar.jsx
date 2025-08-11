@@ -7,16 +7,22 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Search } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
-export default function SuperAdminSidebar() {
+export default function DynamicSidebar() {
   const pathname = usePathname();
-  const role = 'super-admin'; // This should be dynamically set based on user role
+  const { user } = useSelector((state) => state.auth);
+  const role = user?.user_role?.toLowerCase(); // Get role from Redux auth state
+
+  if (!role) {
+    return null; // Or a loading state
+  }
 
   const { mainSections, bottomSection } = SIDEBAR_ROUTES[role] || {
     mainSections: [],
     bottomSection: { items: [] },
   };
-  console.log('role is', role);
+console.log('the role is', role)
   return (
     <>
       {/* Empty spacer div that matches sidebar width */}
@@ -93,12 +99,16 @@ export default function SuperAdminSidebar() {
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage src="/avatars/john-smith.png" />
-              <AvatarFallback className="bg-muted">JS</AvatarFallback>
+              <AvatarImage src="/avatars/default.png" />
+              <AvatarFallback className="bg-muted">
+                {user?.user_name?.charAt(0) || 'U'}
+              </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">John Smith</p>
-              <p className="text-xs text-muted-foreground">Gym Manager</p>
+              <p className="text-sm font-medium">{user?.user_name || 'User'}</p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {role.replace('-', ' ')}
+              </p>
             </div>
           </div>
         </div>
