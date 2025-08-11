@@ -4,9 +4,20 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 // Helper functions for safe localStorage access
+// In your authSlice.js
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
     return localStorage.getItem('auth-token') || null;
+  }
+  return null;
+};
+
+// Add this function to check cookies
+const getCookieToken = () => {
+  if (typeof document !== 'undefined') {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; auth-token=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
   }
   return null;
 };
@@ -29,7 +40,8 @@ const authAxios = axios.create({
   baseURL: '/auth',
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+   withCredentials: true // Add this to send cookies with every request
 });
 
 // Update axios headers with token
@@ -148,11 +160,16 @@ export const verifyLogin = createAsyncThunk(
       const response = await authAxios.post('/verify-login', {
         user_email,
         otp
-      }, {
-        withCredentials: true // Required for cookies
       });
 
       if (!response.data.token) {
+        // Check for cookie-based auth
+        if (response.data.user) {
+          return {
+            user: response.data.user,
+            token: getAuthToken() // Get token from cookie if available
+          };
+        }
         throw new Error('No authentication token received');
       }
 
