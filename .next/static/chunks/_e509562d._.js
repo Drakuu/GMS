@@ -816,25 +816,27 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-;
 function DynamicSidebar() {
-    var _user_user_role, _user_user_name;
+    var _user_user_name;
     _s();
     const pathname = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"])();
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSelector"])({
         "DynamicSidebar.useSelector": (state)=>state.auth
     }["DynamicSidebar.useSelector"]);
-    const role = user === null || user === void 0 ? void 0 : (_user_user_role = user.user_role) === null || _user_user_role === void 0 ? void 0 : _user_user_role.toLowerCase(); // Get role from Redux auth state
+    const role = user === null || user === void 0 ? void 0 : user.user_role; // Get role from Redux auth state
+    console.log('Current role:', role); // Debug log
     if (!role) {
         return null; // Or a loading state
     }
-    const { mainSections, bottomSection } = __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$routes$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SIDEBAR_ROUTES"][role] || {
+    // Get routes for the current role
+    const routes = __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$routes$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SIDEBAR_ROUTES"][role] || {
         mainSections: [],
         bottomSection: {
             items: []
         }
     };
-    console.log('the role is', role);
+    const { mainSections, bottomSection } = routes;
+    console.log('relacvent routes are', routes);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -842,7 +844,7 @@ function DynamicSidebar() {
                 "aria-hidden": "true"
             }, void 0, false, {
                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                lineNumber: 29,
+                lineNumber: 31,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -858,7 +860,7 @@ function DynamicSidebar() {
                                     children: "click"
                                 }, void 0, false, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 36,
+                                    lineNumber: 38,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -866,18 +868,18 @@ function DynamicSidebar() {
                                     children: " fitness"
                                 }, void 0, false, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 37,
+                                    lineNumber: 39,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                            lineNumber: 35,
+                            lineNumber: 37,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 34,
+                        lineNumber: 36,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$scroll$2d$area$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ScrollArea"], {
@@ -890,7 +892,7 @@ function DynamicSidebar() {
                                         children: section.title
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                        lineNumber: 45,
+                                        lineNumber: 47,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -908,45 +910,45 @@ function DynamicSidebar() {
                                                                 children: item.icon
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                                lineNumber: 59,
+                                                                lineNumber: 60,
                                                                 columnNumber: 25
                                                             }, this),
                                                             item.name
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                        lineNumber: 58,
+                                                        lineNumber: 59,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                    lineNumber: 51,
+                                                    lineNumber: 53,
                                                     columnNumber: 21
                                                 }, this)
                                             }, item.path, false, {
                                                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                                lineNumber: 50,
+                                                lineNumber: 52,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                        lineNumber: 48,
+                                        lineNumber: 50,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, section.title, true, {
                                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                lineNumber: 44,
+                                lineNumber: 46,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 42,
+                        lineNumber: 44,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$separator$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Separator"], {}, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 72,
+                        lineNumber: 73,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -978,22 +980,22 @@ function DynamicSidebar() {
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                        lineNumber: 79,
+                                        lineNumber: 80,
                                         columnNumber: 17
                                     }, this)
                                 }, item.path, false, {
                                     fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                                    lineNumber: 78,
+                                    lineNumber: 79,
                                     columnNumber: 15
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                            lineNumber: 76,
+                            lineNumber: 77,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                        lineNumber: 75,
+                        lineNumber: 76,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$separator$2e$jsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Separator"], {}, void 0, false, {
@@ -1067,7 +1069,7 @@ function DynamicSidebar() {
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/layout/DynamicSidebar.jsx",
-                lineNumber: 32,
+                lineNumber: 34,
                 columnNumber: 7
             }, this)
         ]

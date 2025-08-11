@@ -6,23 +6,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Search } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 export default function DynamicSidebar() {
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
-  const role = user?.user_role?.toLowerCase(); // Get role from Redux auth state
-
+  const role = user?.user_role; // Get role from Redux auth state
+  console.log('Current role:', role); // Debug log
   if (!role) {
     return null; // Or a loading state
   }
 
-  const { mainSections, bottomSection } = SIDEBAR_ROUTES[role] || {
+  // Get routes for the current role
+  const routes = SIDEBAR_ROUTES[role] || {
     mainSections: [],
     bottomSection: { items: [] },
   };
-console.log('the role is', role)
+
+  const { mainSections, bottomSection } = routes;
+console.log('relacvent routes are' , routes)
   return (
     <>
       {/* Empty spacer div that matches sidebar width */}
@@ -50,9 +52,8 @@ console.log('the role is', role)
                   <li key={item.path}>
                     <Button
                       variant={pathname === item.path ? 'secondary' : 'ghost'}
-                      className={`w-full justify-start gap-3 ${
-                        pathname === item.path ? 'font-medium' : ''
-                      }`}
+                      className={`w-full justify-start gap-3 ${pathname === item.path ? 'font-medium' : ''
+                        }`}
                       asChild
                     >
                       <a href={item.path}>
@@ -78,9 +79,8 @@ console.log('the role is', role)
               <li key={item.path}>
                 <Button
                   variant={pathname === item.path ? 'secondary' : 'ghost'}
-                  className={`w-full justify-start gap-3 ${
-                    pathname === item.path ? 'font-medium' : ''
-                  }`}
+                  className={`w-full justify-start gap-3 ${pathname === item.path ? 'font-medium' : ''
+                    }`}
                   asChild
                 >
                   <a href={item.path}>
