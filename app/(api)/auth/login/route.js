@@ -14,9 +14,6 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-
-    await connectDB();
-
     // Find user by user_email
     const user = await Models.User.findOne({ user_email });
     if (!user) {

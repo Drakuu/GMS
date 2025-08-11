@@ -21,9 +21,7 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-
-    await connectDB();
-
+    
     // Find user with case-insensitive email match
     const user = await User.findOne({
       user_email: { $regex: new RegExp(`^${user_email}$`, 'i') }

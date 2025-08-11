@@ -14,8 +14,6 @@ export async function POST(req) {
       );
     }
 
-    await connectDB();
-
     const user = await User.findOne({ user_email, isDeleted: { $ne: true } });
     if (!user) {
       return NextResponse.json(

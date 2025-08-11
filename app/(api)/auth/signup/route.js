@@ -16,8 +16,6 @@ export async function POST(req) {
       );
     }
 
-    await connectDB();
-
     // Check if user already exists
     const existing = await User.findOne({ user_email });
     if (existing) {

@@ -5,5 +5,6 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/admin/dashboard/page": "app/admin/dashboard/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/super-admin/dashboard/page": "app/super-admin/dashboard/page.js"
+  "/super-admin/dashboard/page": "app/super-admin/dashboard/page.js",
+  "/super-admin/reports/page": "app/super-admin/reports/page.js"
 }

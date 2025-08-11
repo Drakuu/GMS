@@ -34,8 +34,6 @@ export async function POST(req) {
       );
     }
 
-    await connectDB();
-
     // 4. Find user and verify OTP
     const user = await User.findOne({ user_email: token.email });
     if (!user) {
