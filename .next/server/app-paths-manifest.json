@@ -1,0 +1,13 @@
+{
+  "/(api)/auth/login/route": "app/(api)/auth/login/route.js",
+  "/(api)/auth/resend-otp/route": "app/(api)/auth/resend-otp/route.js",
+  "/(api)/auth/verify-login/route": "app/(api)/auth/verify-login/route.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(auth)/signup/page": "app/(auth)/signup/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js",
+  "/super-admin/dashboard/page": "app/super-admin/dashboard/page.js",
+  "/user/dashboard/page": "app/user/dashboard/page.js"
+}

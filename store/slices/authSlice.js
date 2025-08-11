@@ -7,7 +7,9 @@ import { toast } from 'sonner';
 // In your authSlice.js
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('auth-token') || null;
+    const token = localStorage.getItem('auth-token');
+    console.log('Retrieved token from localStorage:', token);
+    return token;
   }
   return null;
 };
@@ -24,6 +26,7 @@ const getCookieToken = () => {
 
 const setAuthToken = (token) => {
   if (typeof window !== 'undefined') {
+    console.log('Saving token to localStorage:', token);
     localStorage.setItem('auth-token', token);
   }
 };
@@ -38,10 +41,11 @@ const removeAuthToken = () => {
 // Configure axios instance
 const authAxios = axios.create({
   baseURL: '/auth',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   },
-   withCredentials: true // Add this to send cookies with every request
+  // Add this to send cookies with every request
 });
 
 // Update axios headers with token
@@ -160,30 +164,30 @@ export const verifyLogin = createAsyncThunk(
       const response = await authAxios.post('/verify-login', {
         user_email,
         otp
+      }, {
+        withCredentials: true // Crucial for cookies
       });
 
-      if (!response.data.token) {
-        // Check for cookie-based auth
-        if (response.data.user) {
-          return {
-            user: response.data.user,
-            token: getAuthToken() // Get token from cookie if available
-          };
-        }
-        throw new Error('No authentication token received');
+      // Debugging logs
+      console.log('VerifyLogin response:', {
+        data: response.data,
+        headers: response.headers,
+        cookies: document.cookie
+      });
+
+      const token = response.data.token || getCookieToken();
+
+      if (token) {
+        setAuthToken(token); // Save to localStorage
+        updateAxiosHeaders(token);
       }
 
       return {
         user: response.data.user,
-        token: response.data.token
+        token: token
       };
     } catch (error) {
-      console.error('Verification error details:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
-
+       console.error('VerifyLogin error:', error);
       return rejectWithValue(
         error.response?.data?.message ||
         'Verification failed. Please try again.'
@@ -310,7 +314,7 @@ const authSlice = createSlice({
       })
       .addCase(verifyLogin.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.user = payload;
+        state.user = payload.user;
         toast.success('Login successful!');
       })
       .addCase(verifyLogin.rejected, (state, { payload }) => {

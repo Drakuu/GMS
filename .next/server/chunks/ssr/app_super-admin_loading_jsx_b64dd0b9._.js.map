@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 5, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Dell/OneDrive/Desktop/GMS/my-app/app/super-admin/loading.jsx"],"sourcesContent":["import { Skeleton } from '@/components/ui/skeleton';\r\n\r\nexport default function Loading() {\r\n  return (\r\n    <div className=\"p-6 space-y-4\">\r\n      <Skeleton className=\"h-8 w-[250px]\" />\r\n      <div className=\"grid grid-cols-3 gap-4\">\r\n        {[...Array(3)].map((_, i) => (\r\n          <Skeleton key={i} className=\"h-32 rounded-xl\" />\r\n        ))}\r\n      </div>\r\n      <div className=\"mt-6\">\r\n        <Skeleton className=\"h-64 w-full rounded-xl\" />\r\n      </div>\r\n    </div>\r\n  );\r\n}"],"names":[],"mappings":";;;;;;;;;;;AAEe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAU;;0BACb,8OAAC;gBAAS,WAAU;;;;;;0BACpB,8OAAC;gBAAI,WAAU;0BACZ;uBAAI,MAAM;iBAAG,CAAC,GAAG,CAAC,CAAC,GAAG,kBACrB,8OAAC;wBAAiB,WAAU;uBAAb;;;;;;;;;;0BAGnB,8OAAC;gBAAI,WAAU;0BACb,cAAA,8OAAC;oBAAS,WAAU;;;;;;;;;;;;;;;;;AAI5B","debugId":null}}]
+}

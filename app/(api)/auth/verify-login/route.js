@@ -78,7 +78,8 @@ export async function POST(req) {
         user_email: user.user_email,
         user_name: user.user_name,
         user_role: user.user_role
-      }
+      },
+      token: authToken // Explicitly include token in response
     });
 
     // Set secure auth cookie

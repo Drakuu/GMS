@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import AuthLayout from '../layout';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { OtpVerificationForm } from '../components/OtpVerificationForm';
 import { ROLES } from '@/lib/constants';
 
@@ -124,38 +124,48 @@ const OtpVerification = ({ email, onBack }) => {
       }));
 
       console.log('Verification result:', result);
+      console.log('Full payload:', result.payload); // Add this to inspect the full response
 
-      // Check for successful verification (even if token is null)
       if (result.type.endsWith('/fulfilled')) {
         const userRole = result.payload.user?.user_role;
-        console.log('User role:', userRole);
-        console.log('Attempting navigation to:', {
-          role: userRole,
-          path: userRole === ROLES.ADMIN ? '/admin/dashboard' :
-            userRole === ROLES.SUPER_ADMIN ? '/super-admin/dashboard' :
-              userRole === ROLES.USER ? '/user/dashboard' : '/dashboard'
-        });
-        // Redirect based on role
-        switch (userRole) {
-          case ROLES.SUPER_ADMIN:
-            router.push('/super-admin/dashboard');
-            break;
-          case ROLES.ADMIN:
-            router.push('/admin/dashboard');
-            break;
-          case ROLES.USER:
-            router.push('/user/dashboard');
-            break;
-          default:
-            router.push('/dashboard');
+        console.log('User role from backend:', userRole);
+
+        // Convert to string for safety and trim whitespace
+        const role = String(userRole).trim();
+
+        if (role === ROLES.ADMIN) {
+          console.log('Redirecting to admin dashboard');
+          await router.push('/admin/dashboard');
         }
-      } else if (result.error) {
-        console.error("Verification failed:", result.payload);
+        else if (role === ROLES.SUPER_ADMIN) {
+          console.log('Redirecting to super admin dashboard');
+          await router.push('/super-admin/dashboard');
+        }
+        else if (role === ROLES.TRAINER) {
+          console.log('Redirecting to trainer dashboard');
+          await router.push('/trainer/dashboard');
+        }
+        else if (role === ROLES.MEMBER) {
+          console.log('Redirecting to member dashboard');
+          await router.push('/member/dashboard');
+        }
+        else {
+          console.warn('Unknown role, redirecting to default dashboard');
+          await router.push('/dashboard');
+        }
       }
     } catch (error) {
-      console.error("Unexpected error:", error);
+      console.error("Verification error:", error);
     }
   };
+
+  useEffect(() => {
+    console.log('Current auth state:', {
+      user: user?.user_role,
+      // token,
+      loading
+    });
+  }, [user, loading]);
 
   const handleResend = async () => {
     try {
