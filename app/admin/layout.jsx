@@ -13,7 +13,7 @@ export default function AdminLayout({ children }) {
         <AdminSidebar />
         <div className="flex-1 flex flex-col overflow-auto">
           <Header role="admin" />
-          <main className="flex-1 p-4 overflow-auto bg-gray-50">
+          <main className="flex-1 p-4 overflow-auto">
             {children}
           </main>
         </div>
