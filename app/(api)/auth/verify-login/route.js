@@ -5,6 +5,7 @@ import { decodeToken, createAuthToken } from '@/utils/authUtils';
 
 export async function POST(req) {
   try {
+    // 1. Get the temporary token from cookies
     const cookies = req.cookies;
     const tempToken = cookies.get('otp-verification-token')?.value;
 
@@ -15,6 +16,7 @@ export async function POST(req) {
       );
     }
 
+    // 2. Verify the temporary token
     const token = await decodeToken(tempToken);
     if (!token || token.purpose !== 'otp_verification') {
       return NextResponse.json(
@@ -23,6 +25,7 @@ export async function POST(req) {
       );
     }
 
+    // 3. Get OTP from request body
     const { otp } = await req.json();
     if (!otp) {
       return NextResponse.json(
@@ -33,6 +36,7 @@ export async function POST(req) {
 
     await connectDB();
 
+    // 4. Find user and verify OTP
     const user = await User.findOne({ user_email: token.email });
     if (!user) {
       return NextResponse.json(
@@ -41,7 +45,7 @@ export async function POST(req) {
       );
     }
 
-    // Convert both to strings for a type-safe comparison
+    // Type-safe OTP comparison
     if (String(user.user_otp) !== String(otp)) {
       return NextResponse.json(
         { message: "Invalid OTP" },
@@ -49,15 +53,15 @@ export async function POST(req) {
       );
     }
 
-    // Compare expiry as Date
-    if (user.user_otp_expiry && user.user_otp_expiry.getTime() < Date.now()) {
+    // Check OTP expiration
+    if (user.user_otp_expiry && new Date(user.user_otp_expiry) < new Date()) {
       return NextResponse.json(
         { message: "OTP has expired" },
         { status: 400 }
       );
     }
 
-    // Clear OTP fields and update last login
+    // 5. Update user and generate auth token
     user.user_otp = undefined;
     user.user_otp_expiry = undefined;
     user.last_login = new Date();
@@ -65,7 +69,9 @@ export async function POST(req) {
 
     const authToken = await createAuthToken(user);
 
+    // 6. Prepare response with new auth cookie
     const response = NextResponse.json({
+      success: true,
       message: "Login successful",
       user: {
         id: user._id,
@@ -75,6 +81,7 @@ export async function POST(req) {
       }
     });
 
+    // Set secure auth cookie
     response.cookies.set('auth-token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -82,6 +89,7 @@ export async function POST(req) {
       maxAge: 30 * 24 * 60 * 60 // 30 days
     });
 
+    // Clear the temporary verification cookie
     response.cookies.delete('otp-verification-token');
 
     return response;
@@ -89,7 +97,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Verification error:", error);
     return NextResponse.json(
-      { message: "Server error", error: error.message },
+      { success: false, message: "Server error", error: error.message },
       { status: 500 }
     );
   }

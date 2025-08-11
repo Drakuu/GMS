@@ -10,13 +10,13 @@ import { Search } from 'lucide-react';
 
 export default function SuperAdminSidebar() {
   const pathname = usePathname();
-  const role = 'super-admin';
+  const role = 'super-admin'; // This should be dynamically set based on user role
 
   const { mainSections, bottomSection } = SIDEBAR_ROUTES[role] || {
     mainSections: [],
     bottomSection: { items: [] },
   };
-
+  console.log('role is', role);
   return (
     <>
       {/* Empty spacer div that matches sidebar width */}
@@ -50,7 +50,9 @@ export default function SuperAdminSidebar() {
                       asChild
                     >
                       <a href={item.path}>
-                        <span className="text-muted-foreground">{item.icon}</span>
+                        <span className="text-muted-foreground">
+                          {item.icon}
+                        </span>
                         {item.name}
                       </a>
                     </Button>

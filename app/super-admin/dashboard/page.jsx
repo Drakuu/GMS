@@ -1,21 +1,16 @@
 'use client';
 
-import React from 'react';
 import {
-  Users,
-  DollarSign,
-  TrendingUp,
-  Calendar,
-  Dumbbell,
-  Target,
-  Activity,
-  UserPlus,
-  CreditCard,
-  AlertCircle,
-  Clock,
-  Award,
-  Zap,
-} from 'lucide-react';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import {
   BarChart,
   Bar,
@@ -32,6 +27,21 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import {
+  Users,
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  Dumbbell,
+  Target,
+  Activity,
+  UserPlus,
+  CreditCard,
+  AlertCircle,
+  Clock,
+  Award,
+  Zap,
+} from 'lucide-react';
 
 export default function GymDashboard() {
   // Sample data for charts
@@ -45,7 +55,14 @@ export default function GymDashboard() {
   ];
 
   const classAttendanceData = [
-    { day: 'Monday', yoga: 25, cardio: 35, strength: 40, hiit: 20, total: 120 },
+    {
+      day: 'Monday',
+      yoga: 25,
+      cardio: 35,
+      strength: 40,
+      hiit: 20,
+      total: 120,
+    },
     {
       day: 'Tuesday',
       yoga: 30,
@@ -70,7 +87,14 @@ export default function GymDashboard() {
       hiit: 28,
       total: 142,
     },
-    { day: 'Friday', yoga: 35, cardio: 45, strength: 48, hiit: 30, total: 158 },
+    {
+      day: 'Friday',
+      yoga: 35,
+      cardio: 45,
+      strength: 48,
+      hiit: 30,
+      total: 158,
+    },
     {
       day: 'Saturday',
       yoga: 40,
@@ -79,13 +103,20 @@ export default function GymDashboard() {
       hiit: 35,
       total: 160,
     },
-    { day: 'Sunday', yoga: 38, cardio: 30, strength: 25, hiit: 15, total: 108 },
+    {
+      day: 'Sunday',
+      yoga: 38,
+      cardio: 30,
+      strength: 25,
+      hiit: 15,
+      total: 108,
+    },
   ];
 
   const membershipTypeData = [
-    { name: 'Elite', value: 35, color: '#FA8072', count: 68 },
-    { name: 'Premium', value: 40, color: '#B22222', count: 78 },
-    { name: 'Standard', value: 25, color: '#DC143C', count: 49 },
+    { name: 'Elite', value: 35, color: '#f59e0b', count: 68 },
+    { name: 'Premium', value: 40, color: '#EF4444', count: 78 },
+    { name: 'Standard', value: 25, color: '#F87171', count: 49 },
   ];
 
   const recentMembers = [
@@ -179,23 +210,19 @@ export default function GymDashboard() {
     },
   ];
 
-  function CustomTooltip({ active, payload, label }) {
+  const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white border border-red-200 rounded-lg p-4 shadow-xl">
-          <p className="text-red-600 font-semibold mb-2">{label}</p>
+        <div className=" border border-primary rounded-lg p-4 shadow-2xl backdrop-blur-sm">
+          <p className="text-primary font-semibold mb-2">{label}</p>
           {payload.map((entry, index) => (
-            <p
-              key={index}
-              className="text-gray-800 text-sm"
-              style={{ color: entry.color }}
-            >
+            <p key={index} className=" text-sm" style={{ color: entry.color }}>
               <span className="capitalize">{entry.dataKey}:</span> {entry.value}{' '}
               attendees
             </p>
           ))}
-          <div className="border-t border-red-200 mt-2 pt-2">
-            <p className="text-red-500 font-medium">
+          <div className="border-t border-primary mt-2 pt-2">
+            <p className="text-primary font-medium">
               Total: {payload.reduce((sum, entry) => sum + entry.value, 0)}{' '}
               attendees
             </p>
@@ -204,147 +231,141 @@ export default function GymDashboard() {
       );
     }
     return null;
-  }
+  };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen  p-6">
       <div className="max-w-full mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between  rounded-2xl ">
+        <div className="flex items-center justify-between rounded-2xl p-6 backdrop-blur-sm">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-4">
-              {/* <div className="p-3  font-bold rounded-xl">
-                <Dumbbell className="h-8 w-8 text-red-600 " />
-              </div> */}
-              <span className="bg-gradient-to-r from-red-800 to-red-900 bg-clip-text text-transparent">
-                Welcome to Click Fitness
-              </span>
+            <h1 className="text-4xl font-bold  flex items-center gap-4">
+              <div className="p-3  rounded-xl">
+                <Dumbbell className="h-8 w-8 text-primary" />
+              </div>
+              <span className="">CLICK FITNESS</span>
             </h1>
-            <p className="text-red-600/80 mt-2 text-lg">
-              Professional Gym Management System
-            </p>
+            <p className=" mt-2 text-lg">Professional Gym Management System</p>
           </div>
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 border-green-200 px-4 py-2 text-sm font-medium">
+            <Badge className="bg-muted text-primary px-4 py-2">
               <Activity className="h-4 w-4 mr-2" />
               System Online
-            </span>
-            <button className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 font-semibold shadow-lg shadow-red-500/25">
+            </Badge>
+            <Button>
               <UserPlus className="h-5 w-5 mr-2" />
               Add Member
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Metric Card 1 */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div className="flex items-center justify-between pb-3">
-              <h3 className="text-sm font-medium text-red-600">
+          <Card className="border-l-4 border-l-primary shadow-xs shadow-primary/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium ">
                 Total Members
-              </h3>
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Users className="h-5 w-5 text-red-600" />
+              </CardTitle>
+              <div className="p-2 rounded-lg">
+                <Users className="h-5 w-5 text-primary" />
               </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-900 mb-2">1,234</div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold  mb-2">1,234</div>
               <div className="flex items-center text-sm">
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-green-600 font-medium">+12%</span>
-                <span className="text-gray-500 ml-1">from last month</span>
+                <TrendingUp className="h-4 w-4 text-primary mr-1" />
+                <span className="text-primary font-medium">+12%</span>
+                <span className="text-muted-foreground ml-1">
+                  from last month
+                </span>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Metric Card 2 */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div className="flex items-center justify-between pb-3">
-              <h3 className="text-sm font-medium text-red-600">
+          <Card className=" border-l-4 border-l-primary shadow-xs shadow-primary/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium ">
                 Monthly Revenue
-              </h3>
-              <div className="p-2 bg-red-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-red-600" />
+              </CardTitle>
+              <div className="p-2 rounded-lg">
+                <DollarSign className="h-5 w-5 text-primary" />
               </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-900 mb-2">
-                $24,400
-              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold  mb-2">$24,400</div>
               <div className="flex items-center text-sm">
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-green-600 font-medium">+8%</span>
-                <span className="text-gray-500 ml-1">from last month</span>
+                <TrendingUp className="h-4 w-4 text-primary mr-1" />
+                <span className="text-primary font-medium">+8%</span>
+                <span className="text-muted-foreground ml-1">
+                  from last month
+                </span>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Metric Card 3 */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div className="flex items-center justify-between pb-3">
-              <h3 className="text-sm font-medium text-red-600">
+          <Card className=" shadow-xs shadow-primary/10 border-l-4 border-l-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium ">
                 Active Classes
-              </h3>
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-red-600" />
+              </CardTitle>
+              <div className="p-2 rounded-lg">
+                <Calendar className="h-5 w-5 text-primary" />
               </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-900 mb-2">28</div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold  mb-2">28</div>
               <div className="flex items-center text-sm">
-                <Clock className="h-4 w-4 text-red-500 mr-1" />
-                <span className="text-red-600 font-medium">15</span>
-                <span className="text-gray-500 ml-1">scheduled today</span>
+                <Clock className="h-4 w-4 text-primary mr-1" />
+                <span className="text-primary font-medium">15</span>
+                <span className="text-muted-foreground ml-1">
+                  scheduled today
+                </span>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Metric Card 4 */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div className="flex items-center justify-between pb-3">
-              <h3 className="text-sm font-medium text-red-600">
+          <Card className="border-l-4 border-l-primary shadow-xs shadow-primary/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium ">
                 Equipment Status
-              </h3>
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Target className="h-5 w-5 text-red-600" />
+              </CardTitle>
+              <div className="p-2  rounded-lg">
+                <Target className="h-5 w-5 text-primary" />
               </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-900 mb-2">94%</div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold  mb-2">94%</div>
               <div className="flex items-center text-sm">
-                <Zap className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-green-600 font-medium">Operational</span>
+                <Zap className="h-4 w-4 text-primary mr-1" />
+                <span className="text-primary font-medium">Operational</span>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Charts Section */}
+        {/* Charts Section - Improved Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Weekly Class Attendance */}
-          <div className="lg:col-span-2 rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div className="pb-4">
+          {/* Weekly Class Attendance - Now More Compact */}
+          <Card className="lg:col-span-2 shadow-2xl shadow-primary/10">
+            <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  <CardTitle className="text-xl font-bold  mb-1">
                     Weekly Class Attendance
-                  </h2>
-                  <p className="text-red-600/80">
+                  </CardTitle>
+                  <CardDescription className="">
                     Class participation breakdown
-                  </p>
+                  </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center rounded-full bg-red-100 text-red-800 border-red-200 px-2 py-1 text-xs">
-                    Peak: Sat
-                  </span>
-                  <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-800 border-gray-200 px-2 py-1 text-xs">
+                  <Badge className=" px-2 py-1 text-xs">Peak: Sat</Badge>
+                  <Badge className="bg-muted text-primary  px-2 py-1 text-xs">
                     Avg: 136
-                  </span>
+                  </Badge>
                 </div>
               </div>
-            </div>
-            <div>
+            </CardHeader>
+            <CardContent>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart
                   data={classAttendanceData}
@@ -358,10 +379,16 @@ export default function GymDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#E34234" stopOpacity={0.8} />
+                      <stop
+                        offset="0%"
+                        stopColor="#b45309
+"
+                        stopOpacity={0.8}
+                      />
                       <stop
                         offset="100%"
-                        stopColor="#E34234"
+                        stopColor="#b45309
+"
                         stopOpacity={0.3}
                       />
                     </linearGradient>
@@ -372,10 +399,10 @@ export default function GymDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#B22222" stopOpacity={0.8} />
+                      <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.8} />
                       <stop
                         offset="100%"
-                        stopColor="#B22222"
+                        stopColor="#f59e0b"
                         stopOpacity={0.3}
                       />
                     </linearGradient>
@@ -386,10 +413,10 @@ export default function GymDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#DC143C" stopOpacity={0.8} />
+                      <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.8} />
                       <stop
                         offset="100%"
-                        stopColor="#DC143C"
+                        stopColor="#fbbf24"
                         stopOpacity={0.3}
                       />
                     </linearGradient>
@@ -400,39 +427,45 @@ export default function GymDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#D2042D" stopOpacity={0.8} />
+                      <stop
+                        offset="0%"
+                        stopColor="#fde68a
+"
+                        stopOpacity={0.8}
+                      />
                       <stop
                         offset="100%"
-                        stopColor="#D2042D"
+                        stopColor="#fde68a
+"
                         stopOpacity={0.3}
                       />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#e5e7eb"
+                    stroke="#374151"
                     opacity={0.3}
                   />
                   <XAxis
                     dataKey="day"
-                    stroke="#D2042D"
+                    stroke="#f59e0b"
                     fontSize={11}
                     fontWeight={500}
-                    tick={{ fill: '#D2042D' }}
-                    tickFormatter={(value) => value.slice(0, 3)}
+                    tick={{ fill: '#f59e0b' }}
+                    tickFormatter={(value) => value.slice(0, 3)} // Show only first 3 letters
                   />
                   <YAxis
-                    stroke="#D2042D"
+                    stroke="#f59e0b"
                     fontSize={11}
                     fontWeight={500}
-                    tick={{ fill: '#D2042D' }}
+                    tick={{ fill: '#f59e0b' }}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend
                     wrapperStyle={{ paddingTop: '10px' }}
                     iconType="rect"
                     formatter={(value) => (
-                      <span className="text-gray-800 capitalize font-medium text-sm">
+                      <span className=" capitalize font-medium text-sm">
                         {value}
                       </span>
                     )}
@@ -469,132 +502,132 @@ export default function GymDashboard() {
               </ResponsiveContainer>
 
               {/* Compact Class Summary */}
-              <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-red-200">
+              <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-primary/20">
                 {[
-                  { name: 'Yoga', total: 228, color: '#3b82f6', trend: '+5%' },
+                  { name: 'Yoga', total: 228, color: '#b45309', trend: '+5%' },
                   {
                     name: 'Cardio',
                     total: 280,
-                    color: '#6366f1',
+                    color: '#f59e0b',
                     trend: '+12%',
                   },
                   {
                     name: 'Strength',
                     total: 273,
-                    color: '#8b5cf6',
+                    color: '#f59e0b',
                     trend: '+8%',
                   },
-                  { name: 'HIIT', total: 175, color: '#a855f7', trend: '+15%' },
+                  { name: 'HIIT', total: 175, color: '#fde68a', trend: '+15%' },
                 ].map((classType, index) => (
                   <div
                     key={index}
-                    className="bg-red-50 rounded-lg p-3 border border-red-200 text-center"
+                    className=" rounded-lg p-3 border border-primary/10 text-center"
                   >
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <div
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: classType.color }}
                       />
-                      <h4 className="font-medium text-gray-800 text-sm">
-                        {classType.name}
-                      </h4>
+                      <h4 className="font-medium  text-sm">{classType.name}</h4>
                     </div>
-                    <div className="text-lg font-bold text-gray-900">
-                      {classType.total}
-                    </div>
-                    <div className="text-xs text-green-600 font-medium">
+                    <div className="text-lg font-bold ">{classType.total}</div>
+                    <div className="text-xs text-primary font-medium">
                       {classType.trend}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Class Schedule */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
+          {/* Class Schedule - New Addition */}
+          <Card className="border shadow-xl shadow-primary/10">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold ">
                 Today's Schedule
-              </h2>
-              <p className="text-red-600/80">Upcoming classes</p>
-            </div>
-            <div className="space-y-3 mt-4">
-              {[
-                {
-                  time: '09:00',
-                  class: 'Morning Yoga',
-                  instructor: 'Sarah',
-                  spots: 5,
-                },
-                {
-                  time: '10:30',
-                  class: 'HIIT Training',
-                  instructor: 'Mike',
-                  spots: 3,
-                },
-                {
-                  time: '12:00',
-                  class: 'Strength Training',
-                  instructor: 'Emma',
-                  spots: 8,
-                },
-                {
-                  time: '14:00',
-                  class: 'Cardio Blast',
-                  instructor: 'James',
-                  spots: 2,
-                },
-                {
-                  time: '16:30',
-                  class: 'Evening Yoga',
-                  instructor: 'Lisa',
-                  spots: 6,
-                },
-                {
-                  time: '18:00',
-                  class: 'CrossFit',
-                  instructor: 'David',
-                  spots: 4,
-                },
-              ].map((schedule, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-red-600 font-bold text-sm bg-red-100 px-2 py-1 rounded">
-                      {schedule.time}
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Upcoming classes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[
+                  {
+                    time: '09:00',
+                    class: 'Morning Yoga',
+                    instructor: 'Sarah',
+                    spots: 5,
+                  },
+                  {
+                    time: '10:30',
+                    class: 'HIIT Training',
+                    instructor: 'Mike',
+                    spots: 3,
+                  },
+                  {
+                    time: '12:00',
+                    class: 'Strength Training',
+                    instructor: 'Emma',
+                    spots: 8,
+                  },
+                  {
+                    time: '14:00',
+                    class: 'Cardio Blast',
+                    instructor: 'James',
+                    spots: 2,
+                  },
+                  {
+                    time: '16:30',
+                    class: 'Evening Yoga',
+                    instructor: 'Lisa',
+                    spots: 6,
+                  },
+                  {
+                    time: '18:00',
+                    class: 'CrossFit',
+                    instructor: 'David',
+                    spots: 4,
+                  },
+                ].map((schedule, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 rounded-lg border "
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-primary font-bold text-sm bg-muted px-2 py-1 rounded">
+                        {schedule.time}
+                      </div>
+                      <div>
+                        <p className=" font-medium text-sm">{schedule.class}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {schedule.instructor}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-gray-800 font-medium text-sm">
-                        {schedule.class}
-                      </p>
-                      <p className="text-gray-500 text-xs">
-                        {schedule.instructor}
-                      </p>
-                    </div>
+                    <Badge className="bg-muted text-primary text-xs">
+                      {schedule.spots} spots
+                    </Badge>
                   </div>
-                  <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 border-green-200 text-xs px-2.5 py-0.5">
-                    {schedule.spots} spots
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Revenue and Member Growth */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Member Growth Chart */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Member Growth</h2>
-              <p className="text-red-600/80">
+          <Card className="border shadow-xs shadow-primary/10">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold ">
+                Member Growth
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Monthly member acquisition trends
-              </p>
-            </div>
-            <div className="mt-4">
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={memberGrowthData}>
                   <defs>
@@ -605,28 +638,27 @@ export default function GymDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#D2042D" stopOpacity={0.8} />
+                      <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.8} />
                       <stop
                         offset="100%"
-                        stopColor="#D2042D"
+                        stopColor="#f59e0b"
                         stopOpacity={0.3}
                       />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#e5e7eb"
+                    stroke="#f59e0b"
                     opacity={0.3}
                   />
-                  <XAxis dataKey="month" stroke="#D2042D" />
-                  <YAxis stroke="#D2042D" />
+                  <XAxis dataKey="month" stroke="#f59e0b" />
+                  <YAxis stroke="#f59e0b" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #D2042D',
+                      backgroundColor: '#000000',
+                      border: '1px solid #f59e0b',
                       borderRadius: '12px',
-                      color: '#111827',
-                      boxShadow: '0 10px 25px rgba(59, 130, 246, 0.2)',
+                      color: '#f59e0b',
                     }}
                   />
                   <Bar
@@ -636,16 +668,20 @@ export default function GymDashboard() {
                   />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Revenue Trend */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Revenue Trend</h2>
-              <p className="text-red-600/80">Monthly revenue growth</p>
-            </div>
-            <div className="mt-4">
+          <Card className="shadow-xs shadow-primary/10">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold ">
+                Revenue Trend
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Monthly revenue growth
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={memberGrowthData}>
                   <defs>
@@ -656,111 +692,119 @@ export default function GymDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#D2042D" stopOpacity={0.3} />
+                      <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.3} />
                       <stop
                         offset="100%"
-                        stopColor="#D2042D"
+                        stopColor="#f59e0b"
                         stopOpacity={0.05}
                       />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#e5e7eb"
+                    stroke="#374151"
                     opacity={0.3}
                   />
-                  <XAxis dataKey="month" stroke="#D2042D" />
-                  <YAxis stroke="#D2042D" />
+                  <XAxis dataKey="month" stroke="#f59e0b" />
+                  <YAxis stroke="#f59e0b" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #D2042D',
+                      backgroundColor: '#000000',
+                      border: '1px solid #f59e0b',
                       borderRadius: '12px',
-                      color: '#111827',
-                      boxShadow: '0 10px 25px rgba(59, 130, 246, 0.2)',
+                      color: '#FFFFFF',
                     }}
                   />
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#D2042D"
+                    stroke="#f59e0b"
                     strokeWidth={3}
                     fill="url(#revenueGradient)"
                   />
                   <Line
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#D2042D"
+                    stroke="#f59e0b"
                     strokeWidth={3}
-                    dot={{ fill: '#D2042D', strokeWidth: 2, r: 6 }}
-                    activeDot={{ r: 8, fill: '#6366f1' }}
+                    dot={{ fill: '#f59e0b', strokeWidth: 2, r: 6 }}
+                    activeDot={{ r: 8, fill: '#000000' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Membership Distribution and Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Members Table */}
-          <div className="lg:col-span-2 rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
+          <Card className="lg:col-span-2  shadow-xs shadow-primary/10 ">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold ">
                 Recent Members
-              </h2>
-              <p className="text-red-600/80">
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Latest member registrations and their details
-              </p>
-            </div>
-            <div className="mt-4 space-y-4">
-              {recentMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-red-50 border border-red-200 hover:border-red-300 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-red-200">
-                      <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-red-700 text-white font-bold">
-                        {member.avatar}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-4 rounded-xl  transition-all duration-300 border"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-12 w-12 border-2 border-primary/30">
+                        <AvatarFallback className="text-primary font-bold">
+                          {member.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold text-lg">{member.name}</p>
+                        <p className="text-primary">{member.email}</p>
+                        <p className="text-gray-400 text-sm">
+                          {member.joinDate}
+                        </p>
                       </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 text-lg">
-                        {member.name}
+                    <div className="text-right">
+                      <Badge
+                        variant={
+                          member.status === 'Active'
+                            ? 'active'
+                            : member.status === 'Pending'
+                            ? 'pending'
+                            : member.status === 'Inactive'
+                            ? 'inactive'
+                            : 'default'
+                        }
+                        className="mb-2"
+                      >
+                        {member.status}
+                      </Badge>
+                      <p className="text-primary text-sm font-medium">
+                        {member.plan}
                       </p>
-                      <p className="text-red-600/70">{member.email}</p>
-                      <p className="text-gray-500 text-sm">{member.joinDate}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium mb-2 ${
-                        member.status === 'Active'
-                          ? 'bg-green-100 text-green-800 border-green-200'
-                          : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                      }`}
-                    >
-                      {member.status}
-                    </span>
-                    <p className="text-red-600 font-medium">{member.plan}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Membership Distribution */}
-          <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
+          <Card className=" shadow-xs shadow-primary/10">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold ">
                 Membership Plans
-              </h2>
-              <p className="text-red-600/80">
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Distribution of membership types
-              </p>
-            </div>
-            <div className="mt-4">
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
@@ -778,10 +822,10 @@ export default function GymDashboard() {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #D2042D',
+                      backgroundColor: '#000000',
+                      border: '1px solid #f59e0b',
                       borderRadius: '12px',
-                      color: '#111827',
+                      color: '#FFFFFF',
                     }}
                   />
                 </PieChart>
@@ -790,155 +834,146 @@ export default function GymDashboard() {
                 {membershipTypeData.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 rounded-lg bg-red-50"
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted"
                   >
                     <div className="flex items-center gap-3">
                       <div
                         className="w-4 h-4 rounded-full"
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-gray-800 font-medium">
-                        {item.name}
-                      </span>
+                      <span className="font-medium">{item.name}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-gray-900 font-bold">
-                        {item.value}%
-                      </span>
-                      <p className="text-red-600/70 text-sm">
+                      <span className="font-bold">{item.value}%</span>
+                      <p className="text-primary text-sm">
                         {item.count} members
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Activity Feed */}
-        <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
-            <p className="text-red-600/80">
+        <Card className=" shadow-xs shadow-primary/10">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold ">
+              Recent Activity
+            </CardTitle>
+            <CardDescription className="text-primary">
               Latest gym activities and notifications
-            </p>
-          </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {recentActivities.map((activity) => {
-              const IconComponent = activity.icon;
-              return (
-                <div
-                  key={activity.id}
-                  className="flex flex-col items-center p-4 rounded-xl bg-red-50 border border-red-200 hover:border-red-300 transition-all duration-300"
-                >
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {recentActivities.map((activity) => {
+                const IconComponent = activity.icon;
+                return (
                   <div
-                    className={`p-3 rounded-full mb-3 ${
-                      activity.type === 'member_join'
-                        ? 'bg-red-100 text-red-600'
-                        : activity.type === 'payment'
-                        ? 'bg-green-100 text-green-600'
-                        : activity.type === 'class'
-                        ? 'bg-purple-100 text-purple-600'
-                        : activity.type === 'achievement'
-                        ? 'bg-yellow-100 text-yellow-600'
-                        : 'bg-red-100 text-red-600'
-                    }`}
+                    key={activity.id}
+                    className="flex flex-col items-center p-4 rounded-xl transition-all duration-300"
                   >
-                    <IconComponent className="h-6 w-6" />
+                    <div
+                      className={`p-3 rounded-full mb-3 ${
+                        activity.type === 'member_join'
+                          ? 'bg-blue-600/20 text-blue-400'
+                          : activity.type === 'payment'
+                          ? 'bg-green-600/20 text-green-400'
+                          : activity.type === 'class'
+                          ? 'bg-purple-600/20 text-purple-400'
+                          : activity.type === 'achievement'
+                          ? 'bg-yellow-600/20 text-yellow-400'
+                          : 'bg-red-600/20 text-red-400'
+                      }`}
+                    >
+                      <IconComponent className="h-6 w-6" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm  font-medium mb-1">
+                        {activity.user}
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {activity.action}
+                      </p>
+                      <p className="text-xs text-primary">{activity.time}</p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm text-gray-800 font-medium mb-1">
-                      {activity.user}
-                    </p>
-                    <p className="text-xs text-gray-600 mb-2">
-                      {activity.action}
-                    </p>
-                    <p className="text-xs text-red-600">{activity.time}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Equipment Status */}
-        <div className="rounded-xl border border-red-200 bg-white p-6 shadow">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
+        <Card className=" shadow-xs shadow-primary/10">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold ">
               Equipment Status
-            </h2>
-            <p className="text-red-600/80">
+            </CardTitle>
+            <CardDescription className="text-primary">
               Current status of gym equipment and maintenance schedule
-            </p>
-          </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                name: 'Treadmills',
-                total: 12,
-                working: 11,
-                maintenance: 1,
-                icon: '🏃',
-              },
-              {
-                name: 'Weight Machines',
-                total: 20,
-                working: 19,
-                maintenance: 1,
-                icon: '🏋️',
-              },
-              {
-                name: 'Free Weights',
-                total: 50,
-                working: 48,
-                maintenance: 2,
-                icon: '💪',
-              },
-              {
-                name: 'Cardio Equipment',
-                total: 15,
-                working: 14,
-                maintenance: 1,
-                icon: '❤️',
-              },
-            ].map((equipment, index) => (
-              <div
-                key={index}
-                className="p-6 rounded-xl bg-red-50 border border-red-200"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{equipment.icon}</span>
-                    <h4 className="font-semibold text-gray-800">
-                      {equipment.name}
-                    </h4>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                {
+                  name: 'Treadmills',
+                  total: 12,
+                  working: 11,
+                  maintenance: 1,
+                  icon: '🏃',
+                },
+                {
+                  name: 'Weight Machines',
+                  total: 20,
+                  working: 19,
+                  maintenance: 1,
+                  icon: '🏋️',
+                },
+                {
+                  name: 'Free Weights',
+                  total: 50,
+                  working: 48,
+                  maintenance: 2,
+                  icon: '💪',
+                },
+                {
+                  name: 'Cardio Equipment',
+                  total: 15,
+                  working: 14,
+                  maintenance: 1,
+                  icon: '❤️',
+                },
+              ].map((equipment, index) => (
+                <div key={index} className="p-6 rounded-xl border">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{equipment.icon}</span>
+                      <h4 className="font-semibold ">{equipment.name}</h4>
+                    </div>
+                    <Badge className="bg-muted text-primary px-4 py-2">
+                      {equipment.working}/{equipment.total}
+                    </Badge>
                   </div>
-                  <span className="inline-flex items-center rounded-full bg-red-100 text-red-800 border-red-200 px-2.5 py-0.5 text-xs font-medium">
-                    {equipment.working}/{equipment.total}
-                  </span>
-                </div>
-                <div className="relative h-3 w-full overflow-hidden rounded-full bg-gray-200">
-                  <div
-                    className="h-full w-full flex-1 bg-gradient-to-r from-red-600 to-red-700 transition-all"
-                    style={{
-                      transform: `translateX(-${
-                        100 - (equipment.working / equipment.total) * 100
-                      }%)`,
-                    }}
+                  <Progress
+                    value={(equipment.working / equipment.total) * 100}
+                    className="h-3 mb-3"
                   />
+                  <p className="text-sm text-muted-foreground">
+                    {equipment.maintenance} in maintenance
+                  </p>
+                  <p className="text-sm text-primary font-medium">
+                    {Math.round((equipment.working / equipment.total) * 100)}%
+                    operational
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">
-                  {equipment.maintenance} in maintenance
-                </p>
-                <p className="text-sm text-green-600 font-medium mt-1">
-                  {Math.round((equipment.working / equipment.total) * 100)}%
-                  operational
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

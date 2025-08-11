@@ -67,7 +67,7 @@ export default function SignUpPage() {
 
       <div className="mt-4 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <a href="/auth/login" className="underline text-primary">
+        <a href="/login" className="underline text-primary">
           Login
         </a>
       </div>

@@ -116,57 +116,61 @@ export const loginUser = createAsyncThunk(
       const response = await authAxios.post('/login', {
         user_email: credentials.user_email,
         user_password: credentials.user_password
+      }, {
+        withCredentials: true // Required for cookies
       });
-      
-      // Set the temporary verification token from response
-      if (response.headers['set-cookie']) {
-        const tempToken = response.headers['set-cookie']
-          .find(c => c.includes('otp-verification-token'))
-          ?.split(';')[0]
-          .split('=')[1];
-        if (tempToken) {
-          localStorage.setItem('otp-verification-token', tempToken);
-        }
+
+      // Check for OTP in response (for development)
+      if (!response.data.user_otp) {
+        throw new Error('No OTP received');
       }
-      
+
       return {
         user_email: credentials.user_email,
         otp: response.data.user_otp,
         otp_expiry: response.data.user_otp_expiry
       };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.message ||
+        'Login failed'
+      );
     }
   }
 );
 
-// Update verifyLogin thunk
+// Enhanced verifyLogin thunk
 export const verifyLogin = createAsyncThunk(
   'auth/verifyLogin',
   async ({ user_email, otp }, { rejectWithValue }) => {
     try {
-      const tempToken = localStorage.getItem('otp-verification-token');
-      if (!tempToken) {
-        throw new Error('Session expired. Please login again.');
-      }
-
       const response = await authAxios.post('/verify-login', {
         user_email,
         otp
       }, {
-        headers: {
-          'Cookie': `otp-verification-token=${tempToken}`
-        }
+        withCredentials: true // Required for cookies
       });
 
-      if (response.data.token) {
-        setAuthToken(response.data.token);
-        localStorage.removeItem('otp-verification-token');
+      if (!response.data.token) {
+        throw new Error('No authentication token received');
       }
-      
-      return response.data.user;
+
+      return {
+        user: response.data.user,
+        token: response.data.token
+      };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Verification failed');
+      console.error('Verification error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+
+      return rejectWithValue(
+        error.response?.data?.message ||
+        'Verification failed. Please try again.'
+      );
     }
   }
 );

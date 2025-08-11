@@ -98,6 +98,7 @@ export default function LoginPage() {
 
 const OtpVerification = ({ email, onBack }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { otp, loading, error } = useSelector((state) => state.auth);
 
   const handleOtpChange = (e) => {
@@ -107,25 +108,50 @@ const OtpVerification = ({ email, onBack }) => {
 
   const handleVerify = async (e) => {
     e.preventDefault();
-    if (!otp || otp.length !== 6) return;
 
-    const result = await dispatch(verifyLogin({
-      user_email: email,
-      otp
-    }));
+    if (!otp || otp.length !== 6) {
+      dispatch(setError("Please enter a 6-digit code"));
+      return;
+    }
 
-    if (!result.error) {
-      router.push('/dashboard'); // Redirect on success
+    try {
+      const result = await dispatch(verifyLogin({
+        user_email: email,
+        otp
+      }));
+
+      if (result.payload?.token) {
+        router.push('/dashboard');
+      } else if (result.error) {
+        console.error("Verification failed:", result.payload);
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
     }
   };
 
   const handleResend = async () => {
-    await dispatch(resendOtp({ user_email: email }));
+    try {
+      const result = await dispatch(resendOtp({ user_email: email }));
+      if (result.error) {
+        console.error("Resend failed:", result.payload);
+      } else {
+        console.log("New OTP sent successfully");
+      }
+    } catch (error) {
+      console.error("Resend error:", error);
+    }
   };
 
   return (
     <div className="space-y-4">
-      <button onClick={onBack}>← Back to login</button>
+      <button
+        onClick={onBack}
+        className="text-sm text-muted-foreground hover:text-primary"
+      >
+        ← Back to login
+      </button>
+
       <OtpVerificationForm
         email={email}
         otp={otp}
