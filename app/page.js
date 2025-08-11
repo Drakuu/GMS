@@ -7,14 +7,25 @@ import AdminLayout from './admin/layout';
 import UserLayout from './user/layout';
 import AuthLayout from '@/app/(auth)/layout';
 import LandingPage from './landing/page';
-
-// Temporary hardcoded role - change this to test different layouts
- // Change to ROLES.ADMIN or ROLES.USER to test others
-const CURRENT_ROLE = null;
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function RoleBasedLayout({ children }) {
+  const { user, token } = useSelector((state) => state.auth);
+  const router = useRouter();
 
-  switch (CURRENT_ROLE) {
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!token) {
+      router.push('/login');
+    }
+  }, [token, router]);
+
+  if (!token) {
+    return <AuthLayout>{children}</AuthLayout>;
+  }
+
+  switch (user?.user_role) {
     case ROLES.SUPER_ADMIN:
       return <SuperAdminLayout>{children}</SuperAdminLayout>;
     case ROLES.ADMIN:

@@ -15,6 +15,8 @@ import { Loader2 } from "lucide-react";
 import AuthLayout from '../layout';
 import { useState } from 'react';
 import { OtpVerificationForm } from '../components/OtpVerificationForm';
+import { ROLES } from '@/lib/constants';
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -96,10 +98,11 @@ export default function LoginPage() {
   );
 }
 
+// Update your OtpVerification component
 const OtpVerification = ({ email, onBack }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { otp, loading, error } = useSelector((state) => state.auth);
+  const { otp, loading, error, user } = useSelector((state) => state.auth);
 
   const handleOtpChange = (e) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
@@ -120,8 +123,32 @@ const OtpVerification = ({ email, onBack }) => {
         otp
       }));
 
-      if (result.payload?.token) {
-        router.push('/dashboard');
+      console.log('Verification result:', result);
+
+      // Check for successful verification (even if token is null)
+      if (result.type.endsWith('/fulfilled')) {
+        const userRole = result.payload.user?.user_role;
+        console.log('User role:', userRole);
+        console.log('Attempting navigation to:', {
+          role: userRole,
+          path: userRole === ROLES.ADMIN ? '/admin/dashboard' :
+            userRole === ROLES.SUPER_ADMIN ? '/super-admin/dashboard' :
+              userRole === ROLES.USER ? '/user/dashboard' : '/dashboard'
+        });
+        // Redirect based on role
+        switch (userRole) {
+          case ROLES.SUPER_ADMIN:
+            router.push('/super-admin/dashboard');
+            break;
+          case ROLES.ADMIN:
+            router.push('/admin/dashboard');
+            break;
+          case ROLES.USER:
+            router.push('/user/dashboard');
+            break;
+          default:
+            router.push('/dashboard');
+        }
       } else if (result.error) {
         console.error("Verification failed:", result.payload);
       }
