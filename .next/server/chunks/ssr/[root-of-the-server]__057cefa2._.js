@@ -53,33 +53,51 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$red
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader-circle.js [app-ssr] (ecmascript) <export default as Loader2>");
+(()=>{
+    const e = new Error("Cannot find module './l'");
+    e.code = 'MODULE_NOT_FOUND';
+    throw e;
+})();
 'use client';
 ;
 ;
 ;
 ;
 ;
+;
+;
 function ProtectedRoute({ children, allowedRoles }) {
-    const { user, loading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useSelector"])((state)=>state.auth);
+    const { user, token: reduxToken, loading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useSelector"])((state)=>state.auth);
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
     const [isChecking, setIsChecking] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if (!loading) {
-            // Get token directly from localStorage for the check
-            const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
-            console.log('ProtectedRoute check - token:', token, 'role:', user?.user_role);
-            if ("TURBOPACK compile-time truthy", 1) {
+            // Get token from both localStorage and Redux for redundancy
+            const localStorageToken = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
+            const token = reduxToken || localStorageToken;
+            console.log('ProtectedRoute check - token:', token, 'user:', user);
+            if (!token) {
                 console.log('No token, redirecting to login');
                 router.push('/login');
-            } else //TURBOPACK unreachable
-            ;
+                return;
+            }
+            if (!user) {
+                console.log('User data not loaded yet, waiting...');
+                return;
+            }
+            if (allowedRoles && !allowedRoles.includes(user.user_role)) {
+                console.log('Role not allowed, redirecting to unauthorized');
+                router.push((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["unauthorized"])());
+                return;
+            }
             setIsChecking(false);
         }
     }, [
         user,
         allowedRoles,
         router,
-        loading
+        loading,
+        reduxToken
     ]);
     if (loading || isChecking) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -88,22 +106,21 @@ function ProtectedRoute({ children, allowedRoles }) {
                 className: "h-8 w-8 animate-spin"
             }, void 0, false, {
                 fileName: "[project]/app/ProtectedRoute.js",
-                lineNumber: 34,
+                lineNumber: 46,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/ProtectedRoute.js",
-            lineNumber: 33,
+            lineNumber: 45,
             columnNumber: 7
         }, this);
     }
-    // Final check using localStorage directly
-    const token = ("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null;
-    if (!token || allowedRoles && !allowedRoles.includes(user?.user_role)) {
+    // Final check
+    const token = reduxToken || (("TURBOPACK compile-time falsy", 0) ? "TURBOPACK unreachable" : null);
+    if (!token || !user || allowedRoles && !allowedRoles.includes(user.user_role)) {
         return null;
     }
-    //TURBOPACK unreachable
-    ;
+    return children;
 }
 }),
 "[project]/lib/routes.js [app-ssr] (ecmascript)": ((__turbopack_context__) => {

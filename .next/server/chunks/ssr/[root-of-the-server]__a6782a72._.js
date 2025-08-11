@@ -59,6 +59,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 ;
 ;
 ;
+;
 function ProtectedRoute({ children, allowedRoles }) {
     const { user, loading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$redux$2f$dist$2f$react$2d$redux$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useSelector"])((state)=>state.auth);
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
@@ -88,12 +89,12 @@ function ProtectedRoute({ children, allowedRoles }) {
                 className: "h-8 w-8 animate-spin"
             }, void 0, false, {
                 fileName: "[project]/app/ProtectedRoute.js",
-                lineNumber: 34,
+                lineNumber: 35,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/ProtectedRoute.js",
-            lineNumber: 33,
+            lineNumber: 34,
             columnNumber: 7
         }, this);
     }

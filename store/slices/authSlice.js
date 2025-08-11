@@ -1,54 +1,23 @@
 // store/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import {
+  getAuthToken,
+  setAuthToken,
+  removeAuthToken,
+  getCookieToken
+} from '@/lib/authUtils';
 import axios from 'axios';
 import { toast } from 'sonner';
 
 // Helper functions for safe localStorage access
-// In your authSlice.js
-const getAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('auth-token');
-    console.log('Retrieved token from localStorage:', token);
-    return token;
-  }
-  return null;
-};
-
-// Add this function to check cookies
-const getCookieToken = () => {
-  if (typeof document !== 'undefined') {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; auth-token=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  }
-  return null;
-};
-
-const setAuthToken = (token) => {
-  if (typeof window !== 'undefined') {
-    console.log('Saving token to localStorage:', token);
-    localStorage.setItem('auth-token', token);
-  }
-};
-
-const removeAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('auth-token');
-    localStorage.removeItem('otp-verification-token');
-  }
-};
-
-// Configure axios instance
+// Initialize axios instance (can also be moved to a separate file)
 const authAxios = axios.create({
   baseURL: '/auth',
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  // Add this to send cookies with every request
+  headers: { 'Content-Type': 'application/json' }
 });
 
-// Update axios headers with token
+// Update axios headers helper
 const updateAxiosHeaders = (token) => {
   if (token) {
     authAxios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -187,7 +156,7 @@ export const verifyLogin = createAsyncThunk(
         token: token
       };
     } catch (error) {
-       console.error('VerifyLogin error:', error);
+      console.error('VerifyLogin error:', error);
       return rejectWithValue(
         error.response?.data?.message ||
         'Verification failed. Please try again.'
@@ -228,7 +197,7 @@ const initialState = {
     gymId: null
   },
   otp: '',
-  token: typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null
+  token: getAuthToken(),
 };
 
 const authSlice = createSlice({
@@ -314,7 +283,8 @@ const authSlice = createSlice({
       })
       .addCase(verifyLogin.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.user = payload.user;
+        state.user = payload.user;  // Make sure this is being set
+        state.token = payload.token; // And this
         toast.success('Login successful!');
       })
       .addCase(verifyLogin.rejected, (state, { payload }) => {

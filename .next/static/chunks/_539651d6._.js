@@ -43,6 +43,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+;
 function ProtectedRoute(param) {
     let { children, allowedRoles } = param;
     _s();
@@ -62,7 +63,7 @@ function ProtectedRoute(param) {
                     router.push('/login');
                 } else if (allowedRoles && !allowedRoles.includes(user === null || user === void 0 ? void 0 : user.user_role)) {
                     console.log('Role not allowed, redirecting to unauthorized');
-                    router.push('/unauthorized');
+                    router.push((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["unauthorized"])());
                 }
                 setIsChecking(false);
             }
@@ -80,12 +81,12 @@ function ProtectedRoute(param) {
                 className: "h-8 w-8 animate-spin"
             }, void 0, false, {
                 fileName: "[project]/app/ProtectedRoute.js",
-                lineNumber: 34,
+                lineNumber: 35,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/ProtectedRoute.js",
-            lineNumber: 33,
+            lineNumber: 34,
             columnNumber: 7
         }, this);
     }

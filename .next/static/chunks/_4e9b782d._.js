@@ -289,7 +289,8 @@ const authSlice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modul
         }).addCase(verifyLogin.fulfilled, (state, param)=>{
             let { payload } = param;
             state.loading = false;
-            state.user = payload.user;
+            state.user = payload.user; // Make sure this is being set
+            state.token = payload.token; // And this
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success('Login successful!');
         }).addCase(verifyLogin.rejected, (state, param)=>{
             let { payload } = param;
