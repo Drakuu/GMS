@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import User from '@/models/user.model';
 import connectDB from '@/lib/connectDB';
 import { generateOTP } from '@/utils/authUtils';
+import { sendOTPEmail } from '@/services/emailService';
 
 export async function POST(req) {
   try {
@@ -29,7 +30,17 @@ export async function POST(req) {
     user.user_otp_expiry = otpExpiry;
     await user.save();
 
-    console.log(`New OTP for ${user_email}: ${otp}`);
+    // After generating OTP and before saving user
+    await sendOTPEmail(
+      user.user_email,
+      user.user_name || 'User',
+      otp
+    );
+
+    // Remove the console.log for OTP in production
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`New OTP for ${user_email}: ${otp}`);
+    }
 
     return NextResponse.json(
       {

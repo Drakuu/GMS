@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import Models from '@/models';
 import { generateOTP, createTempToken } from '@/utils/authUtils';
 import connectDB from '@/lib/connectDB'; // Add this import
+import { sendOTPEmail } from '@/services/emailService';
 
 export async function POST(req) {
   try {
@@ -50,8 +51,17 @@ export async function POST(req) {
     // Create temp token
     const tempToken = await createTempToken(user.user_email);
 
-    // Log in console
-    console.log(`OTP for ${user_email}: ${otp}, Expires at: ${expiryTime}`);
+    // After generating OTP and before saving user
+    await sendOTPEmail(
+      user.user_email,
+      user.user_name || 'User', // Fallback to 'User' if name not available
+      otp
+    );
+
+    // Remove the console.log for OTP in production
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`OTP for ${user_email}: ${otp}, Expires at: ${expiryTime}`);
+    }
 
     // Return response including OTP & expiry (for testing; remove in production)
     const response = NextResponse.json(
