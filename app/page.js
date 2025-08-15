@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { ROLES } from '@/lib/constants';
 import SuperAdminLayout from './super-admin/layout';
 import AdminLayout from './admin/layout';
-import UserLayout from './user/layout';
+// import UserLayout from './user/layout';
 import AuthLayout from '@/app/(auth)/layout';
 import LandingPage from './landing/page';
 import { useRouter } from 'next/navigation';
@@ -30,8 +30,8 @@ export default function RoleBasedLayout({ children }) {
       return <SuperAdminLayout>{children}</SuperAdminLayout>;
     case ROLES.ADMIN:
       return <AdminLayout>{children}</AdminLayout>;
-    case ROLES.USER:
-      return <UserLayout>{children}</UserLayout>;
+    // case ROLES.USER:
+    //   return <UserLayout>{children}</UserLayout>;
     default:
       return <LandingPage>{children}</LandingPage>;
   }

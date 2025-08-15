@@ -6,6 +6,7 @@ import { generateOTP, generateToken } from '@/utils/authUtils';
 
 export async function POST(req) {
   try {
+    await connectDB();
     const { user_email, user_password, user_name, user_phone, user_role, gym_id } = await req.json();
 
     // Validation

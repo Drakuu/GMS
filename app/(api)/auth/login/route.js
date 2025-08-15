@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import Models from '@/models';
-import connectDB from '@/lib/connectDB';
 import { generateOTP, createTempToken } from '@/utils/authUtils';
+import connectDB from '@/lib/connectDB'; // Add this import
 
 export async function POST(req) {
   try {
+    await connectDB();
     const { user_email, user_password } = await req.json();
 
     if (!user_email || !user_password) {

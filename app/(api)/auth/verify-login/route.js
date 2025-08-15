@@ -5,6 +5,7 @@ import { decodeToken, createAuthToken } from '@/utils/authUtils';
 
 export async function POST(req) {
   try {
+    await connectDB();
     // 1. Get the temporary token from cookies
     const cookies = req.cookies;
     const tempToken = cookies.get('otp-verification-token')?.value;

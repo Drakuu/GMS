@@ -5,6 +5,7 @@ import { generateToken } from '@/utils/authUtils';
 
 export async function POST(req) {
   try {
+    await connectDB();
     const { user_email, user_otp } = await req.json();
 
     // Validation
@@ -21,7 +22,7 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    
+
     // Find user with case-insensitive email match
     const user = await User.findOne({
       user_email: { $regex: new RegExp(`^${user_email}$`, 'i') }

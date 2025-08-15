@@ -13,7 +13,7 @@ import FooterSection from "./FooterSection";
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-background font-display divide-y-2 divide-gray-400">
+    <div className="min-h-screen bg-background font-display divide-y-2 divide-gray-400">
       <HeaderSection />
       <HeroSection />
       < WhyChooseUs />
@@ -25,6 +25,6 @@ export default function LandingPage() {
       <ContactSection />
       <BlogSection />
       <FooterSection />
-    </main >
+    </div>
   );
 }

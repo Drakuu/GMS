@@ -115,12 +115,29 @@ export const loginUser = createAsyncThunk(
         otp_expiry: response.data.user_otp_expiry
       };
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Login failed. Please check your credentials.'
-      );
+    // Mongoose/Mongo connectivity & query errors
+    if (
+      error instanceof mongoose.Error ||
+      error?.name === 'MongoNetworkError' ||
+      error?.name === 'MongoServerError'
+    ) {
+      return res.status(503).json({ message: 'Database service unavailable' });
     }
+
+    // Validation error (e.g., missing fields)
+    if (error?.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
+
+    // Auth failure you explicitly throw
+    if (error?.code === 'INVALID_CREDENTIALS') {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    console.error('Login error:', error);
+    return res.status(500).json({ message: 'Login failed' });
   }
+}
 );
 
 export const verifyLogin = createAsyncThunk(

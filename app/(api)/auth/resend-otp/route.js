@@ -6,7 +6,7 @@ import { generateOTP } from '@/utils/authUtils';
 export async function POST(req) {
   try {
     const { user_email } = await req.json();
-
+    await connectDB();
     if (!user_email) {
       return NextResponse.json(
         { message: "Email is required" },
