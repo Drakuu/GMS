@@ -13,6 +13,13 @@
 # testing
 /coverage
 
+# Next.js build output
+.next/
+
+# Any .next in the repo
+**/.next/
+
+
 # next.js
 /.next/
 /out/
