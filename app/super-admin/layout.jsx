@@ -7,7 +7,7 @@ import Header from '@/components/layout/DynamicNavbar';
 
 export default function SuperAdminLayout({ children }) {
   return (
-    <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
+    <ProtectedRoute >
       <div className="flex h-screen overflow-hidden">
         <SuperAdminSidebar />
         <div className="flex-1 flex flex-col overflow-auto">

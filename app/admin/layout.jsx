@@ -8,7 +8,7 @@ import Header from '@/components/layout/DynamicNavbar';
 export default function AdminLayout({ children }) {
 
   return (
-    <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
+    <ProtectedRoute>
       <div className="flex h-screen overflow-hidden">
         <AdminSidebar />
         <div className="flex-1 flex flex-col overflow-auto">

@@ -11,8 +11,10 @@ import { useSelector } from 'react-redux';
 export default function DynamicSidebar() {
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
-  const role = user?.user_role; // Get role from Redux auth state
+   const role = user?.user_role; // Properly access the role
+  
   console.log('Current role:', role); // Debug log
+  
   if (!role) {
     return null; // Or a loading state
   }

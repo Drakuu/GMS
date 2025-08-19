@@ -1,5 +1,5 @@
 import transporter from '@/lib/emailConfig';
-import { generateOTPEmail } from '@/utils/emailTemplates/otpEmail';
+import { generateOTPEmail } from '@/lib/emailTemplates/otpEmail';
 
 export async function sendOTPEmail(email, name, otp) {
    try {

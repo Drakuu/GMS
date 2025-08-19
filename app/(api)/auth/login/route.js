@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import Models from '@/models';
 import { generateOTP, createTempToken } from '@/utils/authUtils';
 import connectDB from '@/lib/connectDB'; // Add this import
-import { sendOTPEmail } from '@/services/emailService';
+// import { sendOTPEmail } from '@/services/emailService';
 
 export async function POST(req) {
   try {
@@ -52,11 +52,11 @@ export async function POST(req) {
     const tempToken = await createTempToken(user.user_email);
 
     // After generating OTP and before saving user
-    await sendOTPEmail(
-      user.user_email,
-      user.user_name || 'User', // Fallback to 'User' if name not available
-      otp
-    );
+    // await sendOTPEmail(
+    //   user.user_email,
+    //   user.user_name || 'User', // Fallback to 'User' if name not available
+    //   otp
+    // );
 
     // Remove the console.log for OTP in production
     if (process.env.NODE_ENV !== 'production') {
