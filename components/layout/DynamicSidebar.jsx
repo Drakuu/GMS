@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useSelector } from 'react-redux';
+import Link from 'next/link';
 
 export default function DynamicSidebar() {
   const pathname = usePathname();
@@ -20,7 +21,19 @@ export default function DynamicSidebar() {
   }
 
   // Get routes for the current role
-  const routes = SIDEBAR_ROUTES[role] || {
+  const getNormalizedRole = (role) => {
+    if (!role) return null;
+
+    // Handle common variations
+    const normalized = role.trim().toLowerCase();
+    if (normalized.includes('admin')) return 'Admin';
+    if (normalized.includes('super')) return 'SuperAdmin';
+    if (normalized.includes('trainer')) return 'Trainer';
+    return 'Member';
+  };
+
+  const normalizedRole = getNormalizedRole(role);
+  const routes = SIDEBAR_ROUTES[normalizedRole] ||  {
     mainSections: [],
     bottomSection: { items: [] },
   };
@@ -58,12 +71,12 @@ console.log('relacvent routes are' , routes)
                         }`}
                       asChild
                     >
-                      <a href={item.path}>
+                      <Link href={item.path}>
                         <span className="text-muted-foreground">
                           {item.icon}
                         </span>
                         {item.name}
-                      </a>
+                      </Link>
                     </Button>
                   </li>
                 ))}
@@ -85,10 +98,10 @@ console.log('relacvent routes are' , routes)
                     }`}
                   asChild
                 >
-                  <a href={item.path}>
+                  <Link href={item.path}>
                     <span className="text-muted-foreground">{item.icon}</span>
                     {item.name}
-                  </a>
+                  </Link>
                 </Button>
               </li>
             ))}
