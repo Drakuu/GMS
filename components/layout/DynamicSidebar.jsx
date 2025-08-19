@@ -1,5 +1,5 @@
 'use client';
-
+import Link from 'next/link';
 import { SIDEBAR_ROUTES } from '@/lib/routes';
 import { usePathname } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,39 +7,32 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useSelector } from 'react-redux';
-import Link from 'next/link';
+import Loading from '@/app/loading';
 
 export default function DynamicSidebar() {
   const pathname = usePathname();
-  const { user } = useSelector((state) => state.auth);
-   const role = user?.user_role; // Properly access the role
-  
-  console.log('Current role:', role); // Debug log
-  
-  if (!role) {
-    return null; // Or a loading state
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const role = user?.user_role;
+  console.log('User role from backend:', user?.user_role);
+
+  if (!isAuthenticated || !role) {
+    return (
+      <div className="w-64 flex-shrink-0 bg-background border-r h-screen fixed top-0 left-0 z-50 flex items-center justify-center">
+        <Loading />
+      </div>
+    );
   }
 
-  // Get routes for the current role
-  const getNormalizedRole = (role) => {
-    if (!role) return null;
-
-    // Handle common variations
-    const normalized = role.trim().toLowerCase();
-    if (normalized.includes('admin')) return 'Admin';
-    if (normalized.includes('super')) return 'SuperAdmin';
-    if (normalized.includes('trainer')) return 'Trainer';
-    return 'Member';
-  };
-
-  const normalizedRole = getNormalizedRole(role);
-  const routes = SIDEBAR_ROUTES[normalizedRole] ||  {
+  // Use the exact role from backend (should match ROLES constants)
+  const routes = SIDEBAR_ROUTES[role] || {
     mainSections: [],
     bottomSection: { items: [] },
   };
 
   const { mainSections, bottomSection } = routes;
-console.log('relacvent routes are' , routes)
+  console.log('Current role:', role, 'Routes:', routes);
+  console.log('Available SIDEBAR_ROUTES keys:', Object.keys(SIDEBAR_ROUTES));
+
   return (
     <>
       {/* Empty spacer div that matches sidebar width */}

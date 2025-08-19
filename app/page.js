@@ -1,4 +1,3 @@
-// app/page.js
 'use client';
 import { useSelector } from 'react-redux';
 import { ROLES } from '@/lib/constants';
@@ -25,7 +24,16 @@ export default function RoleBasedLayout({ children }) {
     return <AuthLayout>{children}</AuthLayout>;
   }
 
-  switch (user?.user_role) {
+  // Wait for user data to load
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loading />
+      </div>
+    );
+  }
+
+  switch (user.user_role) {
     case ROLES.SUPER_ADMIN:
       return <SuperAdminLayout>{children}</SuperAdminLayout>;
     case ROLES.ADMIN:
