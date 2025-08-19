@@ -8,6 +8,7 @@ import AuthLayout from '@/app/(auth)/layout';
 import LandingPage from './landing/page';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Loading from "@/app/loading"
 
 export default function RoleBasedLayout({ children }) {
   const { user } = useSelector((state) => state.auth);
