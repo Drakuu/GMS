@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import User from '@/models/user.model';
 import connectDB from '@/lib/connectDB';
-import { decodeToken, createAuthToken } from '@/utils/authUtils';
+import { decodeToken, createAuthToken } from '@/utils/authControllerUtils';
 import { securityLogger } from '@/middleware/securityLogger';
 import { apiResponse } from '@/utils/responseHelper';
 

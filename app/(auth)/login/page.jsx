@@ -6,7 +6,8 @@ import {
   verifyLogin,
   setStep,
   setOtp,
-  resendOtp
+  resendOtp,
+  clearError
 } from '@/store/slices/authSlice';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +16,11 @@ import { Loader2 } from "lucide-react";
 import AuthLayout from '../layout';
 import { useEffect, useState } from 'react';
 import { OtpVerificationForm } from '../components/OtpVerificationForm';
-import { ROLES } from '@/lib/constants';
-
+import { ROLES } from '@/Routes/constants';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +31,6 @@ export default function LoginPage() {
     user_password: ''
   });
 
-  // Reset to step 1 when component mounts
   useEffect(() => {
     dispatch(setStep(1));
   }, [dispatch]);
@@ -40,10 +43,19 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.user_email || !formData.user_password) {
+      toast.error("Please fill in all fields");
       return;
     }
 
-    await dispatch(loginUser(formData));
+    // Clear previous errors
+    dispatch(clearError());
+
+    try {
+      await dispatch(loginUser(formData));
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error('An error occurred during login');
+    }
   };
 
   if (step === 2) {
@@ -79,7 +91,20 @@ export default function LoginPage() {
           />
         </div>
         {error && (
-          <div className="text-red-500 text-sm">{error}</div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error}
+              {error.includes('Email service') && (
+                <div className="mt-2">
+                  <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    Try Again
+                  </Button>
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
         )}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? (
@@ -95,19 +120,38 @@ export default function LoginPage() {
 
       <div className="mt-4 text-center text-sm text-muted-foreground">
         Don't have an account?{' '}
-        <a href="/signup" className="underline text-primary">
+        <Link href="/signup" className="underline text-primary">
           Register
-        </a>
+        </Link>
       </div>
     </AuthLayout>
   );
 }
 
-// Update your OtpVerification component
 const OtpVerification = ({ email, onBack }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { otp, loading, error, user } = useSelector((state) => state.auth);
+  const { otp, loading, error } = useSelector((state) => state.auth);
+
+  // Reset error state when component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  // Debugging
+  useEffect(() => {
+    console.log('Current OTP state:', {
+      email,
+      otp,
+      loading,
+      error
+    });
+  }, [email, otp, loading, error]);
+
+  // Debug state
+  useEffect(() => {
+    console.log('OTP Verification State:', { email, otp, loading, error });
+  }, [email, otp, loading, error]);
 
   const handleOtpChange = (e) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
@@ -118,44 +162,30 @@ const OtpVerification = ({ email, onBack }) => {
     e.preventDefault();
 
     if (!otp || otp.length !== 6) {
-      dispatch(setError("Please enter a 6-digit code"));
+      toast.error("Please enter a valid 6-digit OTP");
       return;
     }
-
+    dispatch(clearError());
     try {
       const result = await dispatch(verifyLogin({
         user_email: email,
         otp
       }));
 
-      console.log('Verification result:', result);
-      console.log('Full payload:', result.payload); // Add this to inspect the full response
-
-      if (result.type.endsWith('/fulfilled')) {
+      if (result.payload) {
         const userRole = result.payload.user?.user_role;
-        console.log('User role from backend:', userRole);
+        toast.success('Login successful!');
 
-        // Convert to string for safety and trim whitespace
-        const role = String(userRole).trim();
-
-        if (role === ROLES.ADMIN) {
-          console.log('Redirecting to admin dashboard');
+        // Redirect based on role
+        if (userRole === ROLES.ADMIN) {
           await router.push('/admin/dashboard');
-        }
-        else if (role === ROLES.SUPER_ADMIN) {
-          console.log('Redirecting to super admin dashboard');
+        } else if (userRole === ROLES.SUPER_ADMIN) {
           await router.push('/super-admin/dashboard');
-        }
-        else if (role === ROLES.TRAINER) {
-          console.log('Redirecting to trainer dashboard');
+        } else if (userRole === ROLES.TRAINER) {
           await router.push('/trainer/dashboard');
-        }
-        else if (role === ROLES.MEMBER) {
-          console.log('Redirecting to member dashboard');
+        } else if (userRole === ROLES.MEMBER) {
           await router.push('/member/dashboard');
-        }
-        else {
-          console.warn('Unknown role, redirecting to default dashboard');
+        } else {
           await router.push('/dashboard');
         }
       }
@@ -164,21 +194,11 @@ const OtpVerification = ({ email, onBack }) => {
     }
   };
 
-  useEffect(() => {
-    console.log('Current auth state:', {
-      user: user?.user_role,
-      // token,
-      loading
-    });
-  }, [user, loading]);
-
   const handleResend = async () => {
     try {
       const result = await dispatch(resendOtp({ user_email: email }));
-      if (result.error) {
-        console.error("Resend failed:", result.payload);
-      } else {
-        console.log("New OTP sent successfully");
+      if (result.payload) {
+        toast.success('New OTP sent to your email!');
       }
     } catch (error) {
       console.error("Resend error:", error);

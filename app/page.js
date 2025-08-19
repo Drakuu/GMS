@@ -1,27 +1,27 @@
 // app/page.js
 'use client';
 import { useSelector } from 'react-redux';
-import { ROLES } from '@/lib/constants';
+import { ROLES } from '@/Routes/constants';
+import { checkTokenPersistence } from '@/utils/authSliceUtils';
 import SuperAdminLayout from './super-admin/layout';
 import AdminLayout from './admin/layout';
-// import UserLayout from './user/layout';
 import AuthLayout from '@/app/(auth)/layout';
 import LandingPage from './landing/page';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function RoleBasedLayout({ children }) {
-  const { user, token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const router = useRouter();
 
-  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!token) {
-      router.push('/login');
+    const tokenPersisted = checkTokenPersistence();
+    if (!tokenPersisted) {
+      router.push('/landing');
     }
-  }, [token, router]);
+  }, [router]);
 
-  if (!token) {
+  if (!checkTokenPersistence()) {
     return <AuthLayout>{children}</AuthLayout>;
   }
 
@@ -30,8 +30,6 @@ export default function RoleBasedLayout({ children }) {
       return <SuperAdminLayout>{children}</SuperAdminLayout>;
     case ROLES.ADMIN:
       return <AdminLayout>{children}</AdminLayout>;
-    // case ROLES.USER:
-    //   return <UserLayout>{children}</UserLayout>;
     default:
       return <LandingPage>{children}</LandingPage>;
   }

@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { verifyAuth, checkRoles } from '@/lib/authUtils';
+import { verifyAuth, checkRoles, getAuthToken, removeAuthToken, } from '@/utils/authSliceUtils';
 import { setToken, setUser } from '@/store/slices/authSlice';
 import Loading from './loading';
-import { unauthorized } from 'next/navigation'
+// import unauthorized from '@/app/unauthorized'
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const [authChecked, setAuthChecked] = useState(false);
@@ -19,36 +19,57 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
     const verifyAndProtect = async () => {
       try {
-        // Check existing auth state first
-        if (!token && !isAuthenticated) {
-          const { isValid, user: verifiedUser } = await verifyAuth();
+        // First check localStorage/cookies for token
+        const localToken = getAuthToken() || getCookieToken();
 
-          if (isMounted) {
-            if (isValid && verifiedUser) {
-              dispatch(setUser(verifiedUser));
-              if (verifiedUser.token) {
-                dispatch(setToken(verifiedUser.token));
-              }
-            } else {
-              router.push('/login');
+        // If we have a local token but no Redux state, verify it
+        if (localToken && !token) {
+          const { isValid, user: verifiedUser } = await verifyAuth();
+          if (isMounted && isValid && verifiedUser) {
+            dispatch(setUser(verifiedUser));
+            dispatch(setToken(localToken));
+            if (!allowedRoles || checkRoles(verifiedUser, allowedRoles)) {
+              setAuthChecked(true);
               return;
             }
           }
         }
 
-        // Check roles if specified
-        if (allowedRoles && !checkRoles(user || {}, allowedRoles)) {
-          router.push(unauthorized());
-          return;
+        // First check if we have a valid token in state
+        if (token && isAuthenticated && user) {
+          if (!allowedRoles || checkRoles(user, allowedRoles)) {
+            if (isMounted) setAuthChecked(true);
+            return;
+          }
         }
 
+        // If no valid token in state, verify auth
+        const { isValid, user: verifiedUser } = await verifyAuth();
+
         if (isMounted) {
-          setAuthChecked(true);
+          if (isValid && verifiedUser) {
+            dispatch(setUser(verifiedUser));
+            if (verifiedUser.token) {
+              dispatch(setToken(verifiedUser.token));
+            }
+
+            // Check roles after setting user
+            if (allowedRoles && !checkRoles(verifiedUser, allowedRoles)) {
+              router.push('/unauthorized');
+              return;
+            }
+
+            setAuthChecked(true);
+          } else {
+            router.push('/landing');
+          }
         }
       } catch (error) {
         console.error('Authentication check failed:', error);
         if (isMounted) {
-          router.push('/login');
+          removeAuthToken();
+          removeCookieToken();
+          router.push('/landing');
         }
       }
     };
@@ -59,6 +80,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
       isMounted = false;
     };
   }, [dispatch, router, allowedRoles, token, isAuthenticated, user]);
+
+  console.log('Auth state:', { user, token, isAuthenticated, authChecked });
 
   if (!authChecked) {
     return (

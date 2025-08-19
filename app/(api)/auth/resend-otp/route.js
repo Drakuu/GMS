@@ -1,13 +1,15 @@
+// app/api/auth/resend-otp/route.js
 import { NextResponse } from 'next/server';
 import User from '@/models/user.model';
 import connectDB from '@/lib/connectDB';
-import { generateOTP } from '@/utils/authUtils';
+import { generateOTP } from '@/utils/authControllerUtils';
 import { sendOTPEmail } from '@/services/emailService';
 
 export async function POST(req) {
   try {
     const { user_email } = await req.json();
     await connectDB();
+
     if (!user_email) {
       return NextResponse.json(
         { message: "Email is required" },
@@ -30,22 +32,29 @@ export async function POST(req) {
     user.user_otp_expiry = otpExpiry;
     await user.save();
 
-    // After generating OTP and before saving user
-    await sendOTPEmail(
+    // Send OTP email
+    const emailResult = await sendOTPEmail(
       user.user_email,
       user.user_name || 'User',
       otp
     );
 
-    // Remove the console.log for OTP in production
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`New OTP for ${user_email}: ${otp}`);
+    if (!emailResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to resend OTP",
+          error: emailResult.error || "Email service unavailable"
+        },
+        { status: 503 }
+      );
     }
 
     return NextResponse.json(
       {
-        message: "New OTP generated successfully",
-        user_otp: otp,
+        success: true,
+        message: "New OTP sent successfully",
+        user_otp: process.env.NODE_ENV === 'development' ? otp : undefined,
         user_otp_expiry: otpExpiry
       },
       { status: 200 }

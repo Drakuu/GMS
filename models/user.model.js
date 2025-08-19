@@ -41,18 +41,14 @@ const userSchema = new mongoose.Schema({
   }]
 }, {
   timestamps: true,
-  toJSON: {
-    transform: function (doc, ret) {
-      delete ret.user_password;
-      delete ret.user_otp;
-      delete ret.user_otp_expiry;
-      delete ret.otp_attempts;
-      delete ret.login_attempts;
-      delete ret.is_locked;
-      delete ret.lock_until;
-      return ret;
-    }
+});
+
+// Add pre-save hook to ensure otp_attempts is properly initialized
+userSchema.pre('save', function (next) {
+  if (!this.otp_attempts) {
+    this.otp_attempts = { count: 0, last_attempt: null };
   }
+  next();
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

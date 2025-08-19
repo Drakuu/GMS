@@ -2,9 +2,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loading } from "@/app/loading";
 
-export function UserDetailsForm({ form, handleChange, onSubmit, loading, error }) {
+export function UserDetailsForm({
+  form,
+  handleChange,
+  onSubmit,
+  loading,
+  error
+}) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -58,7 +64,7 @@ export function UserDetailsForm({ form, handleChange, onSubmit, loading, error }
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loading className="mr-2 h-4 w-4 animate-spin" />
             Signing Up...
           </>
         ) : (

@@ -1,4 +1,6 @@
 // utils/responseHelper.js
+import { NextResponse } from 'next/server';
+
 export const apiResponse = {
    success: (data = {}, message = "Success", status = 200) => {
       return NextResponse.json({

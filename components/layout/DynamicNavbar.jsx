@@ -15,12 +15,12 @@ export default function DynamicNavbar({ role }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const userRole = user?.user_role?.toLowerCase() || role?.toLowerCase();
-
+  // console.log('the role is ', userRole)
   const handleLogout = (e) => {
-  e.preventDefault();
-  dispatch(logout()); // Dispatch the sync action
-  router.push('/login');
-};
+    e.preventDefault();
+    dispatch(logout()); // Dispatch the sync action
+    router.push('/login');
+  };
 
   if (!userRole) {
     return null;

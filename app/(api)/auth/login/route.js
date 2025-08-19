@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/user.model';
 import connectDB from '@/lib/connectDB';
-import { generateOTP, createTempToken } from '@/utils/authUtils';
+import { generateOTP, createTempToken } from '@/utils/authControllerUtils';
 import { sendOTPEmail } from '@/services/emailService';
 import { rateLimitLogin } from '@/middleware/rateLimiter';
 import { securityLogger } from '@/middleware/securityLogger';
@@ -118,9 +118,13 @@ export async function POST(req) {
       user.user_otp_expiry = undefined;
       await user.save();
 
+      console.error('Email sending failed:', emailResult.error);
       return apiResponse.error(
         "Email service unavailable",
-        { error: "Failed to send OTP. Please try again later." },
+        {
+          error: emailResult.error || "Failed to send OTP. Please try again later.",
+          debug: process.env.NODE_ENV === 'development' ? emailResult : undefined
+        },
         503
       );
     }
@@ -133,6 +137,7 @@ export async function POST(req) {
       {
         message: "OTP sent to email",
         // Only include OTP in development for testing
+        user_email: user.user_email,
         user_otp: process.env.NODE_ENV === 'development' ? otp : undefined,
         user_otp_expiry: expiryTime
       }

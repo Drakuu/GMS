@@ -1,6 +1,11 @@
 // lib/authUtils.js
 import axios from 'axios';
 
+export const checkTokenPersistence = () => {
+  const token = getAuthToken() || getCookieToken();
+  return !!token;
+};
+
 // Token Management
 export const getAuthToken = () => {
   if (typeof window !== 'undefined') {

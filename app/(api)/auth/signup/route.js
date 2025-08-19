@@ -1,8 +1,10 @@
+// app/api/auth/signup/route.js
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/user.model.js';
 import connectDB from '@/lib/connectDB';
-import { generateOTP, generateToken } from '@/utils/authUtils';
+import { generateOTP, generateToken } from '@/utils/authControllerUtils';
+import { sendOTPEmail } from '@/services/emailService';
 
 export async function POST(req) {
   try {
@@ -37,7 +39,7 @@ export async function POST(req) {
       user_password: hashed,
       user_name: user_name || '',
       user_phone: user_phone || '',
-      user_role: user_role || 'Admin',
+      user_role: user_role || 'Member',
       gym_id: gym_id || null,
       user_otp: otp,
       user_otp_expiry: otpExpiry,
@@ -47,7 +49,30 @@ export async function POST(req) {
     // Save user
     await newUser.save();
 
-    // Generate proper JWT token
+    // Send OTP email
+    const emailResult = await sendOTPEmail(
+      newUser.user_email,
+      newUser.user_name || 'User',
+      otp
+    );
+
+    if (!emailResult.success) {
+      // Rollback OTP if email fails
+      newUser.user_otp = undefined;
+      newUser.user_otp_expiry = undefined;
+      await newUser.save();
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to send OTP email",
+          error: emailResult.error || "Email service unavailable"
+        },
+        { status: 503 }
+      );
+    }
+
+    // Generate token
     const token = generateToken(newUser);
 
     return NextResponse.json(
@@ -58,7 +83,6 @@ export async function POST(req) {
           user_email: newUser.user_email,
           user_name: newUser.user_name,
           user_role: newUser.user_role,
-          // For development only - remove in production:
           otp: process.env.NODE_ENV === 'development' ? otp : undefined,
           otp_expiry: otpExpiry.toISOString()
         },

@@ -11,7 +11,7 @@ import {
   HelpCircle,
   Dumbbell,
 } from 'lucide-react';
-import { ROLES } from './constants';
+import { ROLES } from '../Routes/constants';
 
 export const SIDEBAR_ROUTES = {
   [ROLES.SUPER_ADMIN]: {

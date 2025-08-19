@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ROLES } from '../lib/constants';
+import { ROLES } from '../Routes/constants';
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
@@ -16,11 +16,11 @@ export function middleware(request) {
     if (pathname.startsWith('/super-admin') && role !== ROLES.SUPER_ADMIN) {
       return NextResponse.redirect(new URL('/not-found', request.url));
     }
-    
+
     if (pathname.startsWith('/admin') && role !== ROLES.ADMIN) {
       return NextResponse.redirect(new URL('/not-found', request.url));
     }
-    
+
     if (pathname.startsWith('/user') && role !== ROLES.USER) {
       return NextResponse.redirect(new URL('/not-found', request.url));
     }

@@ -12,6 +12,7 @@ import {
 import { UserDetailsForm } from "../components/UserDetailsForm";
 import { OtpVerificationForm } from "../components/OtpVerificationForm";
 import AuthLayout from '../layout';
+import { toast } from 'sonner';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -24,35 +25,36 @@ export default function SignUpPage() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const signupData = {
-    user_name: formData.name,
-    user_email: formData.email,
-    user_password: formData.password,
-    user_phone: formData.phone
+    const signupData = {
+      user_name: formData.name,
+      user_email: formData.email,
+      user_password: formData.password,
+      user_phone: formData.phone
+    };
+
+    try {
+      const result = await dispatch(signupUser(signupData));
+
+      if (result.payload) {
+        toast.success('OTP sent to your email! Check your inbox.');
+      } else if (result.error) {
+        toast.error(result.error.message || 'Signup failed');
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error('An error occurred during signup');
+    }
   };
 
-  if (formData.role?.trim()) signupData.user_role = formData.role;
-  if (formData.gymId) signupData.gym_id = formData.gymId;
-
-  console.log("Final form data before submission:", signupData);
-  
-  try {
-    const result = await dispatch(signupUser(signupData));
-    if (result.error) {
-      console.error("Signup failed:", result.error);
-    }
-  } catch (error) {
-    console.error("Signup error:", error);
-  }
-};
-
   if (step === 2) {
-    return <OtpVerification
-      email={formData.email}
-      onBack={() => dispatch(setStep(1))}
-    />;
+    return (
+      <OtpVerification
+        email={formData.email}
+        onBack={() => dispatch(setStep(1))}
+      />
+    );
   }
 
   return (
@@ -77,6 +79,7 @@ export default function SignUpPage() {
 
 const OtpVerification = ({ email, onBack }) => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { otp, loading, error } = useSelector((state) => state.auth);
 
   const handleOtpChange = (e) => {
@@ -84,34 +87,45 @@ const OtpVerification = ({ email, onBack }) => {
     dispatch(setOtp(value));
   };
 
-const handleVerify = async (e) => {
-  e.preventDefault();
-  
-  if (!otp || otp.length !== 6) {
-    console.error("Invalid OTP length");
-    return;
-  }
+  const handleVerify = async (e) => {
+    e.preventDefault();
 
-  console.log("Attempting verification with:", {
-    user_email: email,
-    user_otp: otp
-  });
-
-  try {
-    const result = await dispatch(verifySignup({ 
-      user_email: email, 
-      user_otp: otp 
-    }));
-    
-    if (result.error) {
-      console.error("Verification failed:", result.error);
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
     }
-  } catch (error) {
-    console.error("Verification error:", error);
-  }
-};
+
+    try {
+      const result = await dispatch(verifySignup({
+        user_email: email,
+        user_otp: otp
+      }));
+
+      if (result.payload) {
+        toast.success("Account verified successfully!");
+        router.push('/dashboard');
+      } else if (result.error) {
+        toast.error(result.error.message || 'Verification failed');
+      }
+    } catch (error) {
+      toast.error('An error occurred during verification');
+      console.error("Verification error:", error);
+    }
+  };
+
   const handleResend = async () => {
-    await dispatch(resendOtp({ user_email: email }));
+    try {
+      const result = await dispatch(resendOtp({ user_email: email }));
+
+      if (result.payload) {
+        toast.success("New OTP sent to your email! Check your inbox.");
+      } else if (result.error) {
+        toast.error(result.error.message || 'Failed to resend OTP');
+      }
+    } catch (error) {
+      console.error("Resend error:", error);
+      toast.error('An error occurred while resending OTP');
+    }
   };
 
   return (

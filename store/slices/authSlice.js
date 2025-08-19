@@ -6,7 +6,7 @@ import {
   getCookieToken,
   setCookieToken,
   removeCookieToken
-} from '@/lib/authUtils';
+} from '@/utils/authSliceUtils';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -115,29 +115,13 @@ export const loginUser = createAsyncThunk(
         otp_expiry: response.data.user_otp_expiry
       };
     } catch (error) {
-    // Mongoose/Mongo connectivity & query errors
-    if (
-      error instanceof mongoose.Error ||
-      error?.name === 'MongoNetworkError' ||
-      error?.name === 'MongoServerError'
-    ) {
-      return res.status(503).json({ message: 'Database service unavailable' });
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.message ||
+        'Login failed. Please try again.'
+      );
     }
-
-    // Validation error (e.g., missing fields)
-    if (error?.name === 'ValidationError') {
-      return res.status(400).json({ message: error.message });
-    }
-
-    // Auth failure you explicitly throw
-    if (error?.code === 'INVALID_CREDENTIALS') {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    console.error('Login error:', error);
-    return res.status(500).json({ message: 'Login failed' });
   }
-}
 );
 
 export const verifyLogin = createAsyncThunk(
@@ -236,6 +220,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.step = 1; // Reset to login step 1
     },
+    clearError: (state) => {
+      state.error = null;
+    },
     resetAuth: () => initialState
   },
   extraReducers: (builder) => {
@@ -257,19 +244,24 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.step = 2;
-        state.formData.email = payload.user_email;
-        toast.success('OTP sent to your email!');
+        state.formData.email = payload.data?.user_email || payload.user_email;
+        state.otp = payload.data?.user_otp || payload.otp || '';
+        state.error = null;
+        toast.success('OTP sent to your email! Check your inbox.');
       })
       .addCase(verifyLogin.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.user = payload.user;
         state.token = payload.token;
         state.isAuthenticated = true;
+        state.otp = '';
+        state.error = null;
         toast.success('Login successful!');
       })
       .addCase(resendOtp.fulfilled, (state) => {
         state.loading = false;
-        toast.success('New OTP sent to your email!');
+        state.error = null;
+        toast.success('New OTP sent to your email! Check your inbox.');
       })
       // Then add .addMatcher() handlers
       .addMatcher(
@@ -297,6 +289,7 @@ export const {
   setToken,
   setUser,  // Add this to exports
   resetAuth,
+  clearError,
   logout,
 } = authSlice.actions;
 
