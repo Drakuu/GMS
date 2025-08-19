@@ -8,25 +8,25 @@ const mongoConn = mongoose.connection;
 const otpLimiter = process.env.NODE_ENV === 'production'
    ? new RateLimiterMongo({
       storeClient: mongoConn,
-      points: 5, // 5 OTP requests
-      duration: 15 * 60, // per 15 minutes
+      points: 50, // 5 OTP requests
+      duration: 150 * 60, // per 150 minutes
       keyPrefix: 'otp_limiter'
    })
    : new RateLimiterMemory({
-      points: 5,
-      duration: 15 * 60
+      points: 50,
+      duration: 150 * 60
    });
 
 const loginLimiter = process.env.NODE_ENV === 'production'
    ? new RateLimiterMongo({
       storeClient: mongoConn,
-      points: 10, // 10 login attempts
-      duration: 60 * 60, // per hour
+      points: 100, // 10 login attempts
+      duration: 600 * 60, // per hour
       keyPrefix: 'login_limiter'
    })
    : new RateLimiterMemory({
-      points: 10,
-      duration: 60 * 60
+      points: 100,
+      duration: 600 * 60
    });
 
 export const rateLimitOTP = async (req) => {

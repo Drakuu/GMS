@@ -14,8 +14,8 @@ export async function POST(req) {
     await connectDB();
 
     // Apply rate limiting
-    const rateLimitResponse = await rateLimitLogin(req);
-    if (rateLimitResponse) return rateLimitResponse;
+    // const rateLimitResponse = await rateLimitLogin(req);
+    // if (rateLimitResponse) return rateLimitResponse;
 
     const { user_email, user_password } = await req.json();
     const ip = req.headers['x-forwarded-for'] || req.ip || '127.0.0.1';
@@ -113,12 +113,21 @@ export async function POST(req) {
     );
 
     if (!emailResult.success) {
-      // Rollback OTP if email fails
-      user.user_otp = undefined;
-      user.user_otp_expiry = undefined;
-      await user.save();
-
+      // Don't rollback immediately - give user a chance to request again
       console.error('Email sending failed:', emailResult.error);
+
+      // If it's a connection error, suggest retry
+      if (emailResult.error.includes('ETIMEDOUT') || emailResult.error.includes('ECONNREFUSED')) {
+        return apiResponse.error(
+          "Email service temporarily unavailable",
+          {
+            error: "Could not connect to email service. Please try again in a moment.",
+            retry_suggested: true
+          },
+          503
+        );
+      }
+
       return apiResponse.error(
         "Email service unavailable",
         {
