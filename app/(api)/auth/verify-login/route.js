@@ -1,104 +1,149 @@
+// app/api/auth/verify-login/route.js
 import { NextResponse } from 'next/server';
 import User from '@/models/user.model';
 import connectDB from '@/lib/connectDB';
 import { decodeToken, createAuthToken } from '@/utils/authUtils';
+import { securityLogger } from '@/middleware/securityLogger';
+import { apiResponse } from '@/utils/responseHelper';
 
 export async function POST(req) {
   try {
     await connectDB();
-    // 1. Get the temporary token from cookies
-    const cookies = req.cookies;
-    const tempToken = cookies.get('otp-verification-token')?.value;
-
-    if (!tempToken) {
-      return NextResponse.json(
-        { message: "Session expired. Please login again." },
-        { status: 401 }
-      );
-    }
-
-    // 2. Verify the temporary token
-    const token = await decodeToken(tempToken);
-    if (!token || token.purpose !== 'otp_verification') {
-      return NextResponse.json(
-        { message: "Invalid session. Please login again." },
-        { status: 401 }
-      );
-    }
-
-    // 3. Get OTP from request body
     const { otp } = await req.json();
-    if (!otp) {
-      return NextResponse.json(
-        { message: "OTP is required" },
-        { status: 400 }
+    const ip = req.headers['x-forwarded-for'] || req.ip || '127.0.0.1';
+
+    // Get temp token from cookies
+    const tempToken = req.cookies.get('otp-verification-token')?.value;
+    if (!tempToken) {
+      return apiResponse.error(
+        "Session expired",
+        { error: "Please login again" },
+        401
       );
     }
 
-    // 4. Find user and verify OTP
-    const user = await User.findOne({ user_email: token.email });
+    // Verify temp token
+    const token = await decodeToken(tempToken);
+    if (!token?.email || token.purpose !== 'otp_verification') {
+      return apiResponse.error(
+        "Invalid session",
+        { error: "Please login again" },
+        401
+      );
+    }
+
+    // Find user
+    const user = await User.findOne({
+      user_email: token.email
+    }).select('+user_otp +user_otp_expiry +otp_attempts +is_locked +lock_until');
+
     if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
+      await securityLogger(req, null, 'invalid_otp_attempt', { email: token.email });
+      return apiResponse.error(
+        "Authentication failed",
+        { error: "Invalid credentials" },
+        401
       );
     }
 
-    // Type-safe OTP comparison
+    // Check account lock
+    if (user.is_locked && user.lock_until > new Date()) {
+      const remainingMinutes = Math.ceil((user.lock_until - new Date()) / (1000 * 60));
+      return apiResponse.error(
+        "Account temporarily locked",
+        {
+          error: `Too many failed attempts. Try again in ${remainingMinutes} minutes`,
+          lock_until: user.lock_until
+        },
+        403
+      );
+    }
+
+    // Verify OTP
     if (String(user.user_otp) !== String(otp)) {
-      return NextResponse.json(
-        { message: "Invalid OTP" },
-        { status: 400 }
+      // Increment failed attempts
+      user.otp_attempts.count += 1;
+      user.otp_attempts.last_attempt = new Date();
+
+      // Lock account after 3 failed attempts for 15 minutes
+      if (user.otp_attempts.count >= 3) {
+        user.is_locked = true;
+        user.lock_until = new Date(Date.now() + 15 * 60 * 1000);
+      }
+
+      await user.save();
+      await securityLogger(req, user, 'failed_otp_attempt', { attempts: user.otp_attempts.count });
+
+      return apiResponse.error(
+        "Authentication failed",
+        {
+          error: "Invalid OTP",
+          attempts_remaining: 3 - user.otp_attempts.count
+        },
+        401
       );
     }
 
-    // Check OTP expiration
-    if (user.user_otp_expiry && new Date(user.user_otp_expiry) < new Date()) {
-      return NextResponse.json(
-        { message: "OTP has expired" },
-        { status: 400 }
+    // Check OTP expiry
+    if (!user.user_otp_expiry || new Date(user.user_otp_expiry) < new Date()) {
+      await securityLogger(req, user, 'expired_otp_attempt');
+      return apiResponse.error(
+        "Authentication failed",
+        { error: "OTP has expired" },
+        401
       );
     }
 
-    // 5. Update user and generate auth token
+    // Successful verification
     user.user_otp = undefined;
     user.user_otp_expiry = undefined;
+    user.otp_attempts.count = 0;
+    user.is_locked = false;
+    user.lock_until = undefined;
     user.last_login = new Date();
-    await user.save();
-
-    const authToken = await createAuthToken(user);
-
-    // 6. Prepare response with new auth cookie
-    const response = NextResponse.json({
-      success: true,
-      message: "Login successful",
-      user: {
-        id: user._id,
-        user_email: user.user_email,
-        user_name: user.user_name,
-        user_role: user.user_role
-      },
-      token: authToken // Explicitly include token in response
+    user.login_history.push({
+      ip_address: ip,
+      user_agent: req.headers['user-agent'],
+      status: 'success'
     });
 
-    // Set secure auth cookie
+    await user.save();
+    await securityLogger(req, user, 'successful_login');
+
+    // Generate auth token
+    const authToken = await createAuthToken(user);
+
+    // Prepare response
+    const response = apiResponse.success(
+      {
+        user: {
+          id: user._id,
+          user_email: user.user_email,
+          user_name: user.user_name,
+          user_role: user.user_role
+        },
+        token: authToken
+      },
+      "Login successful"
+    );
+
+    // Set auth cookie
     response.cookies.set('auth-token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 // 30 days
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/'
     });
 
-    // Clear the temporary verification cookie
+    // Clear temp cookie
     response.cookies.delete('otp-verification-token');
 
     return response;
 
   } catch (error) {
     console.error("Verification error:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error", error: error.message },
-      { status: 500 }
-    );
+    await securityLogger(req, null, 'verification_error', { error: error.message });
+    return apiResponse.serverError(error.message);
   }
 }

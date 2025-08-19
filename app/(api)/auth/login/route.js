@@ -1,49 +1,103 @@
+// app/api/auth/login/route.js
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import Models from '@/models';
+import User from '@/models/user.model';
+import connectDB from '@/lib/connectDB';
 import { generateOTP, createTempToken } from '@/utils/authUtils';
-import connectDB from '@/lib/connectDB'; // Add this import
 import { sendOTPEmail } from '@/services/emailService';
+import { rateLimitLogin } from '@/middleware/rateLimiter';
+import { securityLogger } from '@/middleware/securityLogger';
+import { apiResponse } from '@/utils/responseHelper';
 
 export async function POST(req) {
   try {
     await connectDB();
+
+    // Apply rate limiting
+    const rateLimitResponse = await rateLimitLogin(req);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { user_email, user_password } = await req.json();
+    const ip = req.headers['x-forwarded-for'] || req.ip || '127.0.0.1';
 
+    // Validation
     if (!user_email || !user_password) {
-      return NextResponse.json(
-        { message: "Email and password are required" },
-        { status: 400 }
+      return apiResponse.error(
+        "Validation failed",
+        {
+          ...(!user_email && { user_email: "Email is required" }),
+          ...(!user_password && { user_password: "Password is required" })
+        },
+        400
       );
     }
-    // Find user by user_email
-    const user = await Models.User.findOne({ user_email });
+
+    // Find user with sensitive fields
+    const user = await User.findOne({ user_email })
+      .select('+user_password +login_attempts +is_locked +lock_until');
+
     if (!user) {
-      return NextResponse.json(
-        { message: "Invalid credentials" },
-        { status: 400 }
+      await securityLogger(req, null, 'failed_login_attempt', { user_email });
+      return apiResponse.error(
+        "Authentication failed",
+        { error: "Invalid credentials" },
+        401
       );
     }
 
-    if (!user.is_verified) {
-      return NextResponse.json(
-        { message: "Please verify your email first" },
-        { status: 400 }
+    // Check account lock
+    if (user.is_locked && user.lock_until > new Date()) {
+      const remainingMinutes = Math.ceil((user.lock_until - new Date()) / (1000 * 60));
+      return apiResponse.error(
+        "Account temporarily locked",
+        {
+          error: `Too many failed attempts. Try again in ${remainingMinutes} minutes`,
+          lock_until: user.lock_until
+        },
+        403
       );
     }
 
-    // Compare passwords
+    // Verify password
     const match = await bcrypt.compare(user_password, user.user_password);
     if (!match) {
-      return NextResponse.json(
-        { message: "Invalid credentials" },
-        { status: 400 }
+      // Track failed attempts
+      user.login_attempts.count += 1;
+      user.login_attempts.last_attempt = new Date();
+
+      // Lock account after 5 failed attempts for 1 hour
+      if (user.login_attempts.count >= 5) {
+        user.is_locked = true;
+        user.lock_until = new Date(Date.now() + 60 * 60 * 1000);
+      }
+
+      user.login_history.push({
+        ip_address: ip,
+        user_agent: req.headers['user-agent'],
+        status: 'failed'
+      });
+
+      await user.save();
+      await securityLogger(req, user, 'failed_login_attempt', { attempts: user.login_attempts.count });
+
+      return apiResponse.error(
+        "Authentication failed",
+        {
+          error: "Invalid credentials",
+          attempts_remaining: 5 - user.login_attempts.count
+        },
+        401
       );
     }
 
-    // Generate and save OTP
+    // Reset login attempts on success
+    user.login_attempts.count = 0;
+    await user.save();
+
+    // Generate OTP
     const otp = generateOTP();
-    const expiryTime = new Date(Date.now() + 7 * 60 * 1000); // exact date-time for expiry
+    const expiryTime = new Date(Date.now() + 7 * 60 * 1000);
+
     user.user_otp = otp;
     user.user_otp_expiry = expiryTime;
     await user.save();
@@ -51,43 +105,53 @@ export async function POST(req) {
     // Create temp token
     const tempToken = await createTempToken(user.user_email);
 
-    // After generating OTP and before saving user
-    await sendOTPEmail(
+    // Send OTP email
+    const emailResult = await sendOTPEmail(
       user.user_email,
-      user.user_name || 'User', // Fallback to 'User' if name not available
+      user.user_name || 'User',
       otp
     );
 
-    // Remove the console.log for OTP in production
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`OTP for ${user_email}: ${otp}, Expires at: ${expiryTime}`);
+    if (!emailResult.success) {
+      // Rollback OTP if email fails
+      user.user_otp = undefined;
+      user.user_otp_expiry = undefined;
+      await user.save();
+
+      return apiResponse.error(
+        "Email service unavailable",
+        { error: "Failed to send OTP. Please try again later." },
+        503
+      );
     }
 
-    // Return response including OTP & expiry (for testing; remove in production)
-    const response = NextResponse.json(
+    // Log OTP generation
+    await securityLogger(req, user, 'otp_generated');
+
+    // Prepare response
+    const response = apiResponse.success(
       {
         message: "OTP sent to email",
-        user_otp: otp,
+        // Only include OTP in development for testing
+        user_otp: process.env.NODE_ENV === 'development' ? otp : undefined,
         user_otp_expiry: expiryTime
-      },
-      { status: 200 }
+      }
     );
 
-    // Set cookie
+    // Set temp cookie
     response.cookies.set('otp-verification-token', tempToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 60 // 7 minutes
+      maxAge: 7 * 60,
+      path: '/'
     });
 
     return response;
 
-  } catch (err) {
-    console.error("Login error:", err);
-    return NextResponse.json(
-      { message: "Server error", error: err.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("Login error:", error);
+    await securityLogger(req, null, 'login_error', { error: error.message });
+    return apiResponse.serverError(error.message);
   }
 }

@@ -1,23 +1,36 @@
 import transporter from '@/lib/emailConfig';
-import { generateOTPEmail } from '@/utils/emailTemplates/otpEmail';
+import { generateOTPEmail } from '@/lib/emailTemplates/otpEmail';
 
 export async function sendOTPEmail(email, name, otp) {
+   if (process.env.NODE_ENV !== 'production') {
+      console.log(`[DEV] OTP for ${email}: ${otp}`);
+      console.log(`Expires at: ${new Date(Date.now() + 7 * 60 * 1000)}`);
+      return true;
+   }
    try {
       const emailContent = generateOTPEmail(name, otp);
 
       const mailOptions = {
-         from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
+         from: `"Test App" <no-reply@testapp.com>`,
          to: email,
          subject: emailContent.subject,
          text: emailContent.text,
          html: emailContent.html,
       };
 
-      await transporter.sendMail(mailOptions);
-      console.log(`OTP email sent to ${email}`);
-      return true;
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Message sent: %s', info.messageId);
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+      return { success: true };
    } catch (error) {
-      console.error('Error sending OTP email:', error);
-      throw new Error('Failed to send OTP email');
+      console.error('Email error:', {
+         code: error.code,
+         command: error.command,
+         stack: error.stack
+      });
+      return {
+         success: false,
+         error: 'Email service unavailable'
+      };
    }
 }

@@ -1045,13 +1045,8 @@ const _httpaccessfallback = __turbopack_context__.r("[project]/node_modules/next
  * Read more: [Next.js Docs: `forbidden`](https://nextjs.org/docs/app/api-reference/functions/forbidden)
  */ const DIGEST = "" + _httpaccessfallback.HTTP_ERROR_FALLBACK_ERROR_CODE + ";403";
 function forbidden() {
-    if ("TURBOPACK compile-time truthy", 1) {
-        throw Object.defineProperty(new Error("`forbidden()` is experimental and only allowed to be enabled when `experimental.authInterrupts` is enabled."), "__NEXT_ERROR_CODE", {
-            value: "E488",
-            enumerable: false,
-            configurable: true
-        });
-    }
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
     // eslint-disable-next-line no-throw-literal
     const error = Object.defineProperty(new Error(DIGEST), "__NEXT_ERROR_CODE", {
         value: "E394",
@@ -1099,13 +1094,8 @@ const _httpaccessfallback = __turbopack_context__.r("[project]/node_modules/next
  * Read more: [Next.js Docs: `unauthorized`](https://nextjs.org/docs/app/api-reference/functions/unauthorized)
  */ const DIGEST = "" + _httpaccessfallback.HTTP_ERROR_FALLBACK_ERROR_CODE + ";401";
 function unauthorized() {
-    if ("TURBOPACK compile-time truthy", 1) {
-        throw Object.defineProperty(new Error("`unauthorized()` is experimental and only allowed to be used when `experimental.authInterrupts` is enabled."), "__NEXT_ERROR_CODE", {
-            value: "E411",
-            enumerable: false,
-            configurable: true
-        });
-    }
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
     // eslint-disable-next-line no-throw-literal
     const error = Object.defineProperty(new Error(DIGEST), "__NEXT_ERROR_CODE", {
         value: "E394",
