@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Dell/OneDrive/Desktop/GMS/my-app/app/landing/page.jsx"],"sourcesContent":["'use client';\r\nimport HeaderSection from './landing/HeaderSection';\r\nimport HeroSection from './landing/HeroSection';\r\n\r\nexport default function LandingPage() {\r\n  return (\r\n    <main className=\"min-h-screen bg-white\">\r\n      <HeaderSection />\r\n      <HeroSection />\r\n    </main>\r\n  );\r\n}\r\n"],"names":[],"mappings":";;;;;;;;;;;;;;AAAA;;;;AAIe,SAAS;IACtB,qBACE,6LAAC;QAAK,WAAU;;0BACd,6LAAC;;;;;0BACD,6LAAC;;;;;;;;;;;AAGP;KAPwB","debugId":null}}]
-}

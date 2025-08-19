@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 38, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Dell/OneDrive/Desktop/GMS/my-app/app/user/dashboard/page.jsx"],"sourcesContent":["import React from 'react'\r\n\r\nconst page = () => {\r\n  return (\r\n    <div>\r\n      page\r\npage\r\n    </div>\r\n  )\r\n}\r\n\r\nexport default page\r\n"],"names":[],"mappings":";;;;AAAA;;;AAEA,MAAM,OAAO;IACX,qBACE,8OAAC;kBAAI;;;;;;AAKT;uCAEe","debugId":null}}]
-}
