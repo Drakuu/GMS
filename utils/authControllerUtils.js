@@ -13,6 +13,7 @@ export const generateToken = (user) => {
   const payload = {
     userId: user._id,
     user_email: user.user_email,
+    user_identifier: user.user_identifier,
     user_role: user.user_role,
     gym_id: user.gym_id
   };

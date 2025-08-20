@@ -3,10 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { verifyAuth, checkRoles, getAuthToken, removeAuthToken, } from '@/utils/authSliceUtils';
+import {
+  verifyAuth,
+  checkRoles,
+  getAuthToken,
+  removeAuthToken,
+  getCookieToken,
+  removeCookieToken
+} from '@/utils/authSliceUtils';
 import { setToken, setUser } from '@/store/slices/authSlice';
 import Loading from './loading';
-// import unauthorized from '@/app/unauthorized'
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const [authChecked, setAuthChecked] = useState(false);
@@ -15,38 +21,69 @@ export default function ProtectedRoute({ children, allowedRoles }) {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkAuth = async () => {
       try {
-        // If we have a token but no user data, verify it
+        // First check localStorage/cookies for token
         const localToken = getAuthToken() || getCookieToken();
 
-        if (localToken && (!user || !isAuthenticated)) {
-          await dispatch(verifyAuth()).unwrap();
+        // If we have a local token but no Redux state, verify it
+        if (localToken && (!token || !isAuthenticated || !user)) {
+          try {
+            // Use the verifyAuth function directly instead of dispatching
+            const { isValid, user: verifiedUser } = await verifyAuth();
+
+            if (isMounted && isValid && verifiedUser) {
+              dispatch(setUser(verifiedUser));
+              dispatch(setToken(localToken));
+
+              if (!allowedRoles || checkRoles(verifiedUser, allowedRoles)) {
+                setAuthChecked(true);
+                return;
+              } else {
+                router.push('/unauthorized');
+                return;
+              }
+            }
+          } catch (error) {
+            console.error('Token verification failed:', error);
+          }
         }
 
-        // If still not authenticated, redirect
-        if (!localToken || !isAuthenticated) {
+        // First check if we have a valid token in state
+        if (token && isAuthenticated && user) {
+          if (!allowedRoles || checkRoles(user, allowedRoles)) {
+            if (isMounted) setAuthChecked(true);
+            return;
+          } else {
+            router.push('/unauthorized');
+            return;
+          }
+        }
+
+        // If no valid token in state or verification failed, redirect to landing
+        if (isMounted) {
+          removeAuthToken();
+          removeCookieToken();
           router.push('/landing');
-          return;
         }
-
-        // Check roles if specified
-        if (allowedRoles && user && !checkRoles(user, allowedRoles)) {
-          router.push('/unauthorized');
-          return;
-        }
-
-        setAuthChecked(true);
       } catch (error) {
         console.error('Auth check failed:', error);
-        removeAuthToken();
-        removeCookieToken();
-        router.push('/landing');
+        if (isMounted) {
+          removeAuthToken();
+          removeCookieToken();
+          router.push('/landing');
+        }
       }
     };
 
     checkAuth();
-  }, [dispatch, router, allowedRoles, user, isAuthenticated]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch, router, allowedRoles, token, isAuthenticated, user]);
 
   console.log('Auth state:', { user, token, isAuthenticated, authChecked });
 

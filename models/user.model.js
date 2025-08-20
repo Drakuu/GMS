@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
+  user_identifier: {
+    type: String,
+    unique: true,
+    sparse: true // Allows null values but ensures uniqueness for non-null values
+  },
   user_name: { type: String },
   user_email: { type: String, required: true, unique: true, lowercase: true },
   user_phone: { type: String },

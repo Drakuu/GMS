@@ -184,6 +184,7 @@ export const verifyLogin = createAsyncThunk(
   }
 );
 
+// In your authSlice.js - verifyAuth thunk
 export const verifyAuth = createAsyncThunk(
   'auth/verifyAuth',
   async (_, { rejectWithValue }) => {
