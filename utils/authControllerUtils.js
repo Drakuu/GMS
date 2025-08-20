@@ -18,6 +18,12 @@ export const generateToken = (user) => {
     gym_id: user.gym_id
   };
   
+  // Make sure JWT_SECRET is set and proper
+  if (!process.env.JWT_SECRET) {
+    console.log('JWT_SECRET is not defined')
+    throw new Error('JWT_SECRET is not defined');
+  }
+
   const token = jwt.sign(
     payload,
     process.env.JWT_SECRET,

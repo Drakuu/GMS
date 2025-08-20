@@ -41,7 +41,6 @@ export async function POST(req) {
     }
 
     // Find user
-    // Find user
     const user = await User.findOne({
       user_email: token.email
     }).select('+user_otp +user_otp_expiry +otp_attempts +is_locked +lock_until');
