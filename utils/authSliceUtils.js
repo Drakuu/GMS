@@ -28,7 +28,7 @@ export const removeAuthToken = () => {
 };
 
 // Cookie Management with SameSite and Secure flags
-export const setCookieToken = (token, expiresIn = 3600) => {
+export const setCookieToken = (token, expiresIn = 30 * 24 * 60 * 60) => {
   if (typeof document !== 'undefined') {
     const expires = new Date(Date.now() + expiresIn * 1000).toUTCString();
     document.cookie = `auth-token=${token}; expires=${expires}; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
@@ -46,7 +46,6 @@ export const getCookieToken = () => {
 
 export const removeCookieToken = () => {
   if (typeof document !== 'undefined') {
-    console.log('Removing auth token cookie');
     document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   }
 };

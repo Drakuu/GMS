@@ -21,6 +21,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { verifyAuth } from '@/store/slices/authSlice';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -131,7 +132,7 @@ export default function LoginPage() {
 const OtpVerification = ({ email, onBack }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { otp, loading, error } = useSelector((state) => state.auth);
+  const { otp, loading, error, user } = useSelector((state) => state.auth); // Get user from state
 
   // Reset error state when component mounts
   useEffect(() => {
@@ -158,6 +159,7 @@ const OtpVerification = ({ email, onBack }) => {
     dispatch(setOtp(value));
   };
 
+  // In your login page component
   const handleVerify = async (e) => {
     e.preventDefault();
 
@@ -165,6 +167,7 @@ const OtpVerification = ({ email, onBack }) => {
       toast.error("Please enter a valid 6-digit OTP");
       return;
     }
+
     dispatch(clearError());
     try {
       const result = await dispatch(verifyLogin({
@@ -172,27 +175,62 @@ const OtpVerification = ({ email, onBack }) => {
         otp
       }));
 
-      if (result.payload) {
-        const userRole = result.payload.user?.user_role;
+      console.log('🔍 Verify login result:', result);
+
+      if (verifyLogin.fulfilled.match(result)) {
+        console.log('✅ Login successful, payload:', result.payload);
+
+        // Debug: Check the actual structure
+        console.log('📋 User object:', result.payload.user);
+        console.log('🎭 User role:', result.payload.user?.user_role);
+        console.log('🔑 Token:', result.payload.token);
+
         toast.success('Login successful!');
 
-        // Redirect based on role
-        if (userRole === ROLES.ADMIN) {
-          await router.push('/admin/dashboard');
-        } else if (userRole === ROLES.SUPER_ADMIN) {
-          await router.push('/super-admin/dashboard');
-        } else if (userRole === ROLES.TRAINER) {
-          await router.push('/trainer/dashboard');
-        } else if (userRole === ROLES.MEMBER) {
-          await router.push('/member/dashboard');
-        } else {
-          await router.push('/dashboard');
+        // Use the user data from the verifyLogin response
+        const userRole = result.payload.user?.user_role;
+
+        if (!userRole) {
+          console.error('❌ No user role found in response');
+          // Fallback: try to get user data from state after a short delay
+          setTimeout(() => {
+            const currentUser = useSelector(state => state.auth.user);
+            console.log('🔄 Fallback user from state:', currentUser);
+            if (currentUser?.user_role) {
+              redirectBasedOnRole(currentUser.user_role);
+            } else {
+              router.push('/dashboard');
+            }
+          }, 100);
+          return;
         }
+
+        // Redirect based on role
+        redirectBasedOnRole(userRole);
       }
     } catch (error) {
       console.error("Verification error:", error);
     }
   };
+
+  // Helper function for redirection
+  const redirectBasedOnRole = (userRole) => {
+    console.log('🔄 Redirecting based on role:', userRole);
+
+    if (userRole === ROLES.ADMIN) {
+      router.push('/admin/dashboard');
+    } else if (userRole === ROLES.SUPER_ADMIN) {
+      router.push('/super-admin/dashboard');
+    } else if (userRole === ROLES.TRAINER) {
+      router.push('/trainer/dashboard');
+    } else if (userRole === ROLES.MEMBER) {
+      router.push('/member/dashboard');
+    } else {
+      console.log('⚠️ Unknown role, redirecting to /dashboard');
+      router.push('/dashboard');
+    }
+  };
+
 
   const handleResend = async () => {
     try {

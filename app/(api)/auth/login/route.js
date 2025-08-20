@@ -145,19 +145,18 @@ export async function POST(req) {
     const response = apiResponse.success(
       {
         message: "OTP sent to email",
-        // Only include OTP in development for testing
         user_email: user.user_email,
         user_otp: process.env.NODE_ENV === 'development' ? otp : undefined,
         user_otp_expiry: expiryTime
       }
     );
 
-    // Set temp cookie
+    // Set temp cookie - FIXED version
     response.cookies.set('otp-verification-token', tempToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 60,
+      sameSite: 'lax', // Changed from 'strict' to 'lax'
+      maxAge: 7 * 60, // 7 minutes in seconds
       path: '/'
     });
 

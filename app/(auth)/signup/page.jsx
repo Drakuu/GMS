@@ -1,3 +1,4 @@
+// app/(auth)/signup/page.js
 "use client";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +14,8 @@ import { UserDetailsForm } from "../components/UserDetailsForm";
 import { OtpVerificationForm } from "../components/OtpVerificationForm";
 import AuthLayout from '../layout';
 import { toast } from 'sonner';
+import { ROLES } from '@/Routes/constants';
+import { useEffect } from 'react';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -37,10 +40,14 @@ export default function SignUpPage() {
     try {
       const result = await dispatch(signupUser(signupData));
 
-      if (result.payload) {
-        toast.success('OTP sent to your email! Check your inbox.');
-      } else if (result.error) {
-        toast.error(result.error.message || 'Signup failed');
+      if (signupUser.fulfilled.match(result)) {
+        if (result.payload.emailSent === false) {
+          toast.warning('Account created but email may not have been sent. Check your OTP below.');
+        } else {
+          toast.success('OTP sent to your email! Check your inbox.');
+        }
+      } else if (signupUser.rejected.match(result)) {
+        toast.error(result.payload || 'Signup failed');
       }
     } catch (error) {
       console.error("Signup error:", error);
@@ -101,11 +108,27 @@ const OtpVerification = ({ email, onBack }) => {
         user_otp: otp
       }));
 
-      if (result.payload) {
+      console.log('🔍 Verify signup result:', result);
+
+      if (verifySignup.fulfilled.match(result)) {
+        console.log('✅ Signup successful, payload:', result.payload);
+        console.log('🎭 User role:', result.payload.user?.user_role);
+
         toast.success("Account verified successfully!");
-        router.push('/dashboard');
-      } else if (result.error) {
-        toast.error(result.error.message || 'Verification failed');
+
+        // Use the user data from the verifySignup response
+        const userRole = result.payload.user?.user_role;
+
+        if (!userRole) {
+          console.error('❌ No user role found in signup response');
+          router.push('/dashboard');
+          return;
+        }
+
+        // Redirect based on role
+        redirectBasedOnRole(userRole);
+      } else if (verifySignup.rejected.match(result)) {
+        toast.error(result.payload || 'Verification failed');
       }
     } catch (error) {
       toast.error('An error occurred during verification');
@@ -113,14 +136,32 @@ const OtpVerification = ({ email, onBack }) => {
     }
   };
 
+  // Helper function for redirection
+  const redirectBasedOnRole = (userRole) => {
+    console.log('🔄 Redirecting based on role:', userRole);
+
+    if (userRole === ROLES.ADMIN) {
+      router.push('/admin/dashboard');
+    } else if (userRole === ROLES.SUPER_ADMIN) {
+      router.push('/super-admin/dashboard');
+    } else if (userRole === ROLES.TRAINER) {
+      router.push('/trainer/dashboard');
+    } else if (userRole === ROLES.MEMBER) {
+      router.push('/member/dashboard');
+    } else {
+      console.log('⚠️ Unknown role, redirecting to /dashboard');
+      router.push('/dashboard');
+    }
+  };
+
   const handleResend = async () => {
     try {
       const result = await dispatch(resendOtp({ user_email: email }));
 
-      if (result.payload) {
+      if (resendOtp.fulfilled.match(result)) {
         toast.success("New OTP sent to your email! Check your inbox.");
-      } else if (result.error) {
-        toast.error(result.error.message || 'Failed to resend OTP');
+      } else if (resendOtp.rejected.match(result)) {
+        toast.error(result.payload || 'Failed to resend OTP');
       }
     } catch (error) {
       console.error("Resend error:", error);

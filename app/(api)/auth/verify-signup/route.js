@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+// app/api/auth/verify-signup/route.js
 import User from '@/models/user.model';
 import connectDB from '@/lib/connectDB';
 import { generateToken } from '@/utils/authControllerUtils';
@@ -9,6 +9,8 @@ export async function POST(req) {
     await connectDB();
     const { user_email, user_otp } = await req.json();
     const ip = req.headers['x-forwarded-for'] || req.ip || '127.0.0.1';
+
+    console.log('🔐 Signup OTP verification attempt:', { user_email, user_otp, ip });
 
     // Standardized validation response
     if (!user_email || !user_otp) {
@@ -30,8 +32,8 @@ export async function POST(req) {
     if (!user) {
       return apiResponse.error(
         "Authentication failed",
-        { error: "Invalid credentials" },
-        401
+        { error: "User not found" },
+        404
       );
     }
 
@@ -114,7 +116,13 @@ export async function POST(req) {
     const token = generateToken(user);
 
     // Security logging
-    console.log(`Successful OTP verification for user: ${user_email}`);
+    console.log('✅ Successful signup verification for user:', user_email);
+    console.log('📤 Sending response with user:', {
+      id: user._id,
+      user_email: user.user_email,
+      user_name: user.user_name,
+      user_role: user.user_role
+    });
 
     return apiResponse.success(
       {
@@ -126,11 +134,11 @@ export async function POST(req) {
           user_role: user.user_role
         }
       },
-      "Authentication successful"
+      "Account verified successfully"
     );
 
   } catch (err) {
-    console.error("Verification error:", err);
+    console.error("Signup verification error:", err);
     return apiResponse.serverError(err.message);
   }
 }

@@ -12,9 +12,14 @@ export async function POST(req) {
     const { otp } = await req.json();
     const ip = req.headers['x-forwarded-for'] || req.ip || '127.0.0.1';
 
+    console.log('🔐 OTP verification attempt:', { otp, ip });
+
     // Get temp token from cookies
     const tempToken = req.cookies.get('otp-verification-token')?.value;
+    console.log('📋 Temp token exists:', !!tempToken);
+
     if (!tempToken) {
+      console.log('❌ No temp token found');
       return apiResponse.error(
         "Session expired",
         { error: "Please login again" },
@@ -24,7 +29,10 @@ export async function POST(req) {
 
     // Verify temp token
     const token = await decodeToken(tempToken);
+    console.log('🔍 Decoded token:', token);
+
     if (!token?.email || token.purpose !== 'otp_verification') {
+      console.log('❌ Invalid token structure');
       return apiResponse.error(
         "Invalid session",
         { error: "Please login again" },
@@ -33,9 +41,14 @@ export async function POST(req) {
     }
 
     // Find user
+    // Find user
     const user = await User.findOne({
       user_email: token.email
     }).select('+user_otp +user_otp_expiry +otp_attempts +is_locked +lock_until');
+
+    console.log('👤 User found:', user ? user.user_email : 'No user found');
+    console.log('🔢 Stored OTP:', user?.user_otp);
+    console.log('⏰ OTP expiry:', user?.user_otp_expiry);
 
     if (!user) {
       await securityLogger(req, null, 'invalid_otp_attempt', { email: token.email });
@@ -126,6 +139,14 @@ export async function POST(req) {
       },
       "Login successful"
     );
+
+    // app/api/auth/verify-login/route.js - Add this before returning response
+    console.log('📤 Sending response with user:', {
+      id: user._id,
+      user_email: user.user_email,
+      user_name: user.user_name,
+      user_role: user.user_role
+    });
 
     // Set auth cookie
     response.cookies.set('auth-token', authToken, {
