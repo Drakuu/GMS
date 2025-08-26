@@ -38,7 +38,6 @@ authAxios.interceptors.response.use(
   }
 );
 
-
 //  signupUser thunk
 export const signupUser = createAsyncThunk(
   'auth/signup',

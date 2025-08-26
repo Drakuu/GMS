@@ -1,9 +1,16 @@
 // lib/constants.js
 export const ROLES = {
-  SUPER_ADMIN: "SuperAdmin",  // Must match exactly
-  ADMIN: "Admin",            // Must match exactly
-  TRAINER: "Trainer",        // Must match exactly
-  MEMBER: "Member"           // Must match exactly
+  SUPER_ADMIN: "SuperAdmin",
+  ADMIN: "Admin",
+  TRAINER: "Trainer",
+  MEMBER: "Member"
+};
+
+export const ROLE_PREFIXES = {
+  [ROLES.SUPER_ADMIN]: 'super-admin',
+  [ROLES.ADMIN]: 'admin',
+  [ROLES.TRAINER]: 'trainer',
+  [ROLES.MEMBER]: 'member'
 };
 
 // export const PERMISSIONS = {

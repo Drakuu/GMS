@@ -83,10 +83,10 @@ export default function DynamicNavbar({ role }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link href="/profile">Profile</Link>
+                  <Link href={`/role/${user.user_role}/profile`}>Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings">Settings</Link>
+                  <Link href={`/role/${user.user_role}/setting`}>Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                   Logout

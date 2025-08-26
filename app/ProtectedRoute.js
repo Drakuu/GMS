@@ -22,6 +22,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
   useEffect(() => {
     let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const checkAuth = async () => {
       try {
@@ -70,7 +72,10 @@ export default function ProtectedRoute({ children, allowedRoles }) {
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        if (isMounted) {
+        if (isMounted && retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(checkAuth, 1000); // Retry after 1 second
+        } else if (isMounted) {
           removeAuthToken();
           removeCookieToken();
           router.push('/landing');

@@ -26,12 +26,17 @@ export const SIDEBAR_ROUTES = {
           },
           {
             name: 'Suscription and Billing',
-            path: '/super-admin/suscription-and-billing',
+            path: '/super-admin/subcription-and-billing',
             icon: <CreditCard size={18} />,
           },
           {
             name: 'Reports',
             path: '/super-admin/reports',
+            icon: <FileText size={18} />,
+          },
+          {
+            name: 'Admins',
+            path: '/super-admin/admins',
             icon: <FileText size={18} />,
           },
         ],
@@ -44,12 +49,6 @@ export const SIDEBAR_ROUTES = {
             path: '/super-admin/company-management',
             icon: <Users size={18} />,
           },
-          {
-            name: 'User Management',
-            path: '/super-admin/user-management',
-            icon: <User size={18} />,
-          },
-
           {
             name: 'Modules Management',
             path: '/super-admin/modules-management',

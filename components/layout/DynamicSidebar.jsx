@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useSelector } from 'react-redux';
 import Loading from '@/app/loading';
 import Link from 'next/link';
+import { ROLES } from '@/Routes/constants';
 
 export default function DynamicSidebar() {
   const pathname = usePathname();
@@ -17,33 +18,33 @@ export default function DynamicSidebar() {
 
   if (!isAuthenticated || !role) {
     return (
-      <div className="w-64 flex-shrink-0 bg-background border-r h-screen fixed top-0 left-0 z-50 flex items-center justify-center">
+      <div>
         <Loading />
       </div>
     );
   }
 
   // Use the exact role from backend (should match ROLES constants)
-  const getNormalizedRole = (role) => {
-    if (!role) return null;
-
-    // Handle common variations
-    const normalized = role.trim().toLowerCase();
-    if (normalized.includes('admin')) return 'Admin';
-    if (normalized.includes('super')) return 'SuperAdmin';
-    if (normalized.includes('trainer')) return 'Trainer';
-    return 'Member';
+  const getRoutesForRole = (role) => {
+    switch (role) {
+      case ROLES.SUPER_ADMIN:
+        return SIDEBAR_ROUTES[ROLES.SUPER_ADMIN];
+      case ROLES.ADMIN:
+        return SIDEBAR_ROUTES[ROLES.ADMIN];
+      case ROLES.USER:
+        return SIDEBAR_ROUTES[ROLES.USER];
+      default:
+        return { mainSections: [], bottomSection: { items: [] } };
+    }
   };
 
-  const normalizedRole = getNormalizedRole(role);
-  const routes = SIDEBAR_ROUTES[normalizedRole] || {
-    mainSections: [],
-    bottomSection: { items: [] },
-  };
+  const routes = getRoutesForRole(role);
+
+  console.log('Current role:', role, 'Routes:', routes);
+  console.log('Available SIDEBAR_ROUTES keys:', Object.keys(SIDEBAR_ROUTES));
 
   const { mainSections, bottomSection } = routes;
-  // console.log('Current role:', role, 'Routes:', routes);
-  // console.log('Available SIDEBAR_ROUTES keys:', Object.keys(SIDEBAR_ROUTES));
+
   return (
     <>
       {/* Empty spacer div that matches sidebar width */}
