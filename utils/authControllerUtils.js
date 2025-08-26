@@ -1,5 +1,5 @@
 // utils/authControllerUtils.js
-import { decode as nextAuthDecode } from 'next-auth/jwt';
+import { encode ,decode as nextAuthDecode } from 'next-auth/jwt';
 import jwt from 'jsonwebtoken';
 
 // Generate 6-digit OTP
@@ -45,7 +45,7 @@ export const createTempToken = async (email) => {
 };
 
 export const decodeToken = async (token) => {
-  return await decode({
+  return await nextAuthDecode({
     token,
     secret: process.env.NEXTAUTH_SECRET
   });
