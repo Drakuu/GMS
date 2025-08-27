@@ -17,8 +17,10 @@ export async function POST(req) {
     // const rateLimitResponse = await rateLimitLogin(req);
     // if (rateLimitResponse) return rateLimitResponse;
 
-    const { user_email, user_password } = await req.json();
-    const ip = req.headers['x-forwarded-for'] || req.ip || '127.0.0.1';
+    const { user_email: rawEmail, user_password: rawPassword } = await req.json();
+    const user_email = (rawEmail || '').trim().toLowerCase();
+    const user_password = String(rawPassword || '').trim();
+   const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
 
     // Validation
     if (!user_email || !user_password) {
@@ -34,7 +36,7 @@ export async function POST(req) {
 
     // Find user with sensitive fields
     const user = await User.findOne({ user_email })
-      .select('+user_password +login_attempts +is_locked +lock_until');
+    .select('+user_password +login_attempts +is_locked +lock_until');
 
     if (!user) {
       await securityLogger(req, null, 'failed_login_attempt', { user_email });
@@ -44,6 +46,11 @@ export async function POST(req) {
         401
       );
     }
+
+    // Ensure login_attempts exists to avoid NaN increments
+     if (!user.login_attempts || typeof user.login_attempts.count !== 'number') {
+         user.login_attempts = { count: 0, last_attempt: null };
+       }
 
     // Check account lock
     if (user.is_locked && user.lock_until > new Date()) {
@@ -62,7 +69,7 @@ export async function POST(req) {
     const match = await bcrypt.compare(user_password, user.user_password);
     if (!match) {
       // Track failed attempts
-      user.login_attempts.count += 1;
+      user.login_attempts.count = (user.login_attempts.count || 0) + 1;;
       user.login_attempts.last_attempt = new Date();
 
       // Lock account after 5 failed attempts for 1 hour
@@ -84,7 +91,7 @@ export async function POST(req) {
         "Authentication failed",
         {
           error: "Invalid credentials",
-          attempts_remaining: 5 - user.login_attempts.count
+          attempts_remaining: Math.max(0, 5 - user.login_attempts.count)
         },
         401
       );
@@ -92,6 +99,7 @@ export async function POST(req) {
 
     // Reset login attempts on success
     user.login_attempts.count = 0;
+    user.login_attempts.last_attempt = new Date();
     await user.save();
 
     // Generate OTP

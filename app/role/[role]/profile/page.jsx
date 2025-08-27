@@ -1,6 +1,5 @@
-// app/role/[role]/profile/page.jsx
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react'; // Add 'use' import
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { ROLES } from '@/Routes/constants';
@@ -11,6 +10,8 @@ import Loading from './loading';
 import { apiClient } from '@/utils/apiClient';
 
 export default function ProfilePage({ params }) {
+   // Unwrap the params promise with React.use()
+   const unwrappedParams = use(params);
    const [userData, setUserData] = useState(null);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
@@ -20,10 +21,10 @@ export default function ProfilePage({ params }) {
 
    // Handle async params
    useEffect(() => {
-      if (params) {
-         setRole(params.role);
+      if (unwrappedParams) {
+         setRole(unwrappedParams.role); // Use unwrappedParams instead of params
       }
-   }, [params]);
+   }, [unwrappedParams]); // Depend on unwrappedParams
 
    useEffect(() => {
       const fetchUserData = async () => {
@@ -39,7 +40,7 @@ export default function ProfilePage({ params }) {
             }
 
             // Use correct URL format with query parameter
-            const response = await apiClient.get(`/api/users/get-user-by-id?id=${targetUserId}`);
+            const response = await apiClient.get(`/users/get-user-by-id?id=${targetUserId}`);
 
             if (!response.ok) {
                const errorData = await response.json();

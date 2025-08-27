@@ -1,54 +1,100 @@
-// app/api/users/update-identifier/route.js
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import User from '@/models/user.model';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/connectDB';
-import { updateUserId } from '@/utils/userIdGenerator';
+import User from '@/models/user.model';
+import Gym from '@/models/gym.model';
 import { apiResponse } from '@/utils/responseHelper';
+import { getRequester, pickUserForToken } from '@/utils/authControllerUtils';
+import { requireRole } from '@/utils/apiHelpers';
 
-export async function PUT(req) {
+export async function PATCH(req) {
    try {
       await connectDB();
 
-      // Check authentication
-      const session = await getServerSession();
-      if (!session) {
-         return apiResponse.error("Unauthorized", {}, 401);
+      // auth
+      const requester = await requireRole(req, ['SuperAdmin', 'Admin'], getRequester);
+
+      // id from query
+      const { searchParams } = new URL(req.url);
+      const id = searchParams.get('id');
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+         return apiResponse.error('Bad Request', { error: 'Valid user id is required' }, 400);
       }
 
-      const { user_name } = await req.json();
-
-      if (!user_name) {
-         return apiResponse.error(
-            "Validation failed",
-            { user_name: "Name is required" },
-            400
-         );
+      // parse body
+      const body = await req.json();
+      if (!body || typeof body !== 'object') {
+         return apiResponse.error('Bad Request', { error: 'Body is required' }, 400);
       }
 
-      // Find the current user
-      const user = await User.findOne({ user_email: session.user.email });
-      if (!user) {
-         return apiResponse.error("User not found", {}, 404);
+      // whitelist updatable fields
+      const allowed = [
+         'user_name',
+         'user_email',
+         'user_phone',
+         'user_role',
+         'is_verified',
+         'isDeleted',
+         'gym_id', // <-- IMPORTANT
+      ];
+      const update = {};
+
+      for (const key of allowed) {
+         if (body[key] !== undefined) update[key] = body[key];
       }
 
-      // Update the user identifier
-      const newUserIdentifier = await updateUserId(user._id, user_name);
+      // Cast/normalize gym_id if present
+      if (update.gym_id !== undefined) {
+         // Allow null to clear
+         if (update.gym_id === null || update.gym_id === 'null' || update.gym_id === '') {
+            update.gym_id = null;
+         } else {
+            if (!mongoose.Types.ObjectId.isValid(update.gym_id)) {
+               return apiResponse.error('Bad Request', { error: 'Invalid gym_id' }, 400);
+            }
 
-      // Also update the user name
-      user.user_name = user_name;
-      await user.save();
+            // Optional: verify the gym exists (and optionally active)
+            const gym = await Gym.findById(update.gym_id).select('_id isActive status ownerUserId');
+            if (!gym) {
+               return apiResponse.error('Error', { error: 'Gym not found' }, 400);
+            }
+            // If Admin role, ensure they own that gym
+            const role = String(requester.role || requester.user_role || '');
+            if (
+               role === 'Admin' &&
+               String(gym.ownerUserId) !== String(requester._id || requester.id)
+            ) {
+               return apiResponse.error('Forbidden', { error: 'Not your gym' }, 403);
+            }
 
-      return apiResponse.success(
-         {
-            user_identifier: newUserIdentifier,
-            user_name: user.user_name
-         },
-         "User identifier updated successfully"
+            update.gym_id = new mongoose.Types.ObjectId(update.gym_id);
+         }
+      }
+
+      if (!Object.keys(update).length) {
+         return apiResponse.error('Bad Request', { error: 'No fields to update' }, 400);
+      }
+
+      const updated = await User.findByIdAndUpdate(
+         id,
+         { $set: update },
+         { new: true, runValidators: true, context: 'query' }
+      )
+         // ensure gym_id is included in projection
+         .select(
+            '_id user_identifier user_name user_email user_phone user_role gym_id otp_attempts login_attempts is_verified isDeleted login_history audit_logs createdAt updatedAt last_login'
+         )
+         .lean();
+
+      if (!updated) {
+         return apiResponse.error('Not Found', { error: 'User not found' }, 404);
+      }
+
+      return apiResponse.success({ user: updated }, 'User updated successfully');
+   } catch (err) {
+      return apiResponse.error(
+         err.status ? 'Error' : 'Server Error',
+         { error: err.message },
+         err.status || 500
       );
-
-   } catch (error) {
-      console.error("Update identifier error:", error);
-      return apiResponse.serverError(error.message);
    }
 }

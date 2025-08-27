@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import User from '@/models/user.model';
 import connectDB from '@/lib/connectDB';
-import { decodeToken, createAuthToken } from '@/utils/authControllerUtils';
+import { decodeToken, createAuthToken, pickUserForToken } from '@/utils/authControllerUtils';
 import { securityLogger } from '@/middleware/securityLogger';
 import { apiResponse } from '@/utils/responseHelper';
 
@@ -12,7 +12,7 @@ export async function POST(req) {
     const { otp } = await req.json();
     const ip = req.headers['x-forwarded-for'] || req.ip || '127.0.0.1';
 
-    console.log('🔐 OTP verification attempt:', { otp, ip });
+    // console.log('🔐 OTP verification attempt:', { otp, ip });
 
     // Get temp token from cookies
     const tempToken = req.cookies.get('otp-verification-token')?.value;
@@ -29,7 +29,7 @@ export async function POST(req) {
 
     // Verify temp token
     const token = await decodeToken(tempToken);
-    console.log('🔍 Decoded token:', token);
+    // console.log('🔍 Decoded token:', token);
 
     if (!token?.email || token.purpose !== 'otp_verification') {
       console.log('❌ Invalid token structure');
@@ -45,9 +45,9 @@ export async function POST(req) {
       user_email: token.email
     }).select('+user_otp +user_otp_expiry +otp_attempts +is_locked +lock_until');
 
-    console.log('👤 User found:', user ? user.user_email : 'No user found');
+    // console.log('👤 User found:', user ? user.user_email : 'No user found');
     console.log('🔢 Stored OTP:', user?.user_otp);
-    console.log('⏰ OTP expiry:', user?.user_otp_expiry);
+    // console.log('⏰ OTP expiry:', user?.user_otp_expiry);
 
     if (!user) {
       await securityLogger(req, null, 'invalid_otp_attempt', { email: token.email });
@@ -125,27 +125,25 @@ export async function POST(req) {
     // Generate auth token
     const authToken = await createAuthToken(user);
 
+    // keep response user shape consistent with token payload
+     const safeUser = pickUserForToken(user);
+
     // Prepare response
     const response = apiResponse.success(
       {
-        user: {
-          id: user._id,
-          user_email: user.user_email,
-          user_name: user.user_name,
-          user_role: user.user_role
-        },
+        user: safeUser,
         token: authToken
       },
       "Login successful"
     );
 
     // app/api/auth/verify-login/route.js - Add this before returning response
-    console.log('📤 Sending response with user:', {
-      id: user._id,
-      user_email: user.user_email,
-      user_name: user.user_name,
-      user_role: user.user_role
-    });
+    // console.log('📤 Sending response with user:', {
+    //   id: user._id,
+    //   user_email: user.user_email,
+    //   user_name: user.user_name,
+    //   user_role: user.user_role
+    // });
 
     // Set auth cookie
     response.cookies.set('auth-token', authToken, {

@@ -7,14 +7,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation'; // Add usePathname
 import { logout } from '@/store/slices/authSlice';
+import Loading from '@/app/loading';
 
 export default function DynamicNavbar({ role }) {
   const router = useRouter();
+  const pathname = usePathname(); // Get current path
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const userRole = user?.user_role?.toLowerCase() || role?.toLowerCase();
+  // Extract role from URL path if not provided as prop
+  const pathRole = pathname?.split('/')[1]; // Gets 'admin' from '/admin/dashboard'
+
+  const userRole = user?.user_role?.toLowerCase() || role?.toLowerCase() || pathRole || '';
   // console.log('the role is ', userRole)
   const handleLogout = (e) => {
     e.preventDefault();
@@ -22,14 +27,15 @@ export default function DynamicNavbar({ role }) {
     router.push('/login');
   };
 
-  if (!userRole) {
-    return null;
+  if (!userRole ) {
+    return <Loading />;
   }
 
   const dashboardTitles = {
     'super-admin': 'Super Admin Dashboard',
     'admin': 'Admin Dashboard',
-    'user': 'User Dashboard'
+    "member": "Member's Dashboard",
+    "trainer": "Trainer's Dashboard",
   };
 
   return (
@@ -83,10 +89,10 @@ export default function DynamicNavbar({ role }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link href={`/role/${user.user_role}/profile`}>Profile</Link>
+                  <Link href={`/role/${userRole}/profile`}>Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`/role/${user.user_role}/setting`}>Settings</Link>
+                  <Link href={`/role/${userRole}/setting`}>Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                   Logout
