@@ -132,7 +132,18 @@ export default function LoginPage() {
 const OtpVerification = ({ email, onBack }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { otp, loading, error, user } = useSelector((state) => state.auth); // Get user from state
+  const { otp, loading, error, user, timeout } = useSelector((state) => state.auth); // Get user from state
+
+  // Add state for timeout scenario
+  const [emailTimeout, setEmailTimeout] = useState(false);
+  const authState = useSelector(state => state.auth);
+
+  useEffect(() => {
+    // Check if we're in a timeout scenario (from login response)
+    if (authState.timeout) {
+      setEmailTimeout(true);
+    }
+  }, []);
 
   // Reset error state when component mounts
   useEffect(() => {
@@ -251,6 +262,16 @@ const OtpVerification = ({ email, onBack }) => {
       >
         ← Back to login
       </button>
+
+      {emailTimeout && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Email Service Delay</AlertTitle>
+          <AlertDescription>
+            Email delivery may be delayed. Your OTP is: <strong>{otp}</strong>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <OtpVerificationForm
         email={email}

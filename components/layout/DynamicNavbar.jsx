@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter, usePathname } from 'next/navigation'; // Add usePathname
-import { logout } from '@/store/slices/authSlice';
+import { logoutUser } from '@/store/slices/authSlice';
 import Loading from '@/app/loading';
 
 export default function DynamicNavbar({ role }) {
@@ -23,8 +23,8 @@ export default function DynamicNavbar({ role }) {
   // console.log('the role is ', userRole)
   const handleLogout = (e) => {
     e.preventDefault();
-    dispatch(logout()); // Dispatch the sync action
-    router.push('/login');
+    dispatch(logoutUser()); // Dispatch the sync action
+    router.push('/landing');
   };
 
   if (!userRole ) {

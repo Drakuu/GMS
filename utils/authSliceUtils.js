@@ -1,4 +1,4 @@
-// lib/authUtils.js
+// utils/authSliceUtils.js (keep this file as is)
 import axios from 'axios';
 
 export const checkTokenPersistence = () => {
@@ -22,12 +22,11 @@ export const setAuthToken = (token) => {
 
 export const removeAuthToken = () => {
   if (typeof window !== 'undefined') {
-    console.log('Removing auth token from localStorage');
     localStorage.removeItem('auth-token');
   }
 };
 
-// Cookie Management with SameSite and Secure flags
+// Cookie Management
 export const setCookieToken = (token, expiresIn = 30 * 24 * 60 * 60) => {
   if (typeof document !== 'undefined') {
     const expires = new Date(Date.now() + expiresIn * 1000).toUTCString();
@@ -68,20 +67,21 @@ export const verifyAuth = async () => {
   }
 };
 
-// Role Checking with hierarchy support
+// Role Checking
 export const checkRoles = (user, allowedRoles = []) => {
   if (!allowedRoles.length) return true;
   if (!user?.user_role) return false;
-  
-  // Implement role hierarchy if needed (e.g., admin > manager > user)
+
   const roleHierarchy = {
-    admin: ['admin', 'manager', 'user'],
-    manager: ['manager', 'user'],
-    user: ['user']
+    SuperAdmin: ['SuperAdmin', 'Admin', 'Manager', 'Trainer', 'Member'],
+    Admin: ['Admin', 'Manager', 'Trainer', 'Member'],
+    Manager: ['Manager', 'Trainer', 'Member'],
+    Trainer: ['Trainer', 'Member'],
+    Member: ['Member']
   };
-  
-  return allowedRoles.some(allowedRole => 
-    roleHierarchy[user.user_role]?.includes(allowedRole) || 
+
+  return allowedRoles.some(allowedRole =>
+    roleHierarchy[user.user_role]?.includes(allowedRole) ||
     user.user_role === allowedRole
   );
 };

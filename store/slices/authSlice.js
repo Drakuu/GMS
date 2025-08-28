@@ -1,4 +1,7 @@
+// store/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { authApi } from '@/services/authApi';
+import { toast } from 'sonner';
 import {
   getAuthToken,
   setAuthToken,
@@ -7,140 +10,73 @@ import {
   setCookieToken,
   removeCookieToken
 } from '@/utils/authSliceUtils';
-import axios from 'axios';
-import { toast } from 'sonner';
 
-// Axios instance with interceptors
-const authAxios = axios.create({
-  baseURL: '/auth',
-  withCredentials: true,
-  headers: { 'Content-Type': 'application/json' }
-});
 
-// Request interceptor for auth token
-authAxios.interceptors.request.use(config => {
-  const token = getAuthToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, error => Promise.reject(error));
-
-// Response interceptor for error handling
-authAxios.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.status === 401) {
-      removeAuthToken();
-      removeCookieToken();
-    }
-    return Promise.reject(error);
-  }
-);
-
-//  signupUser thunk
 export const signupUser = createAsyncThunk(
   'auth/signup',
   async (userData, { rejectWithValue }) => {
     try {
-      const payload = {
-        user_name: userData.user_name,
-        user_email: userData.user_email,
-        user_password: userData.user_password,
-        user_phone: userData.user_phone,
-        ...(userData.user_role && { user_role: userData.user_role }),
-        ...(userData.gym_id && { gym_id: userData.gym_id })
-      };
-
-      const response = await authAxios.post('/signup', payload);
-
-      console.log('🔍 Signup response:', response.data);
-
+      const response = await authApi.signup(userData);
       return {
         user_email: userData.user_email,
-        otp: response.data.data?.otp || response.data.user_otp,
-        otp_expiry: response.data.data?.otp_expiry || response.data.user_otp_expiry,
-        emailSent: response.data.emailSent !== false // Default to true if not specified
+        otp: response.data?.otp || response.user_otp,
+        otp_expiry: response.data?.otp_expiry || response.user_otp_expiry,
+        emailSent: response.emailSent !== false
       };
     } catch (error) {
-      console.error('❌ Signup error:', error.response?.data || error.message);
-      return rejectWithValue(
-        error.response?.data?.message ||
-        error.message ||
-        'Signup failed. Please try again.'
-      );
+      return rejectWithValue(error.message);
     }
   }
 );
 
-// verifySignup thunk
 export const verifySignup = createAsyncThunk(
   'auth/verifySignup',
   async ({ user_email, user_otp }, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/verify-signup', {
-        user_email,
-        user_otp
-      });
+      const response = await authApi.verifySignup({ user_email, user_otp });
 
-      console.log('🔍 Verify signup response:', response.data);
-
-      const token = response.data.token || response.data.data?.token;
-      if (token) {
-        setAuthToken(token);
-        setCookieToken(token);
-      }
-
-      // Handle different response structures
-      const userData = response.data.user || response.data.data?.user;
+      const userData = response.user || response.data?.user;
+      const token = response.token || response.data?.token;
 
       if (!userData) {
-        console.error('❌ No user data in signup response:', response.data);
         throw new Error('No user data received');
       }
 
-      return {
-        user: userData,
-        token
-      };
+      return { user: userData, token };
     } catch (error) {
-      console.error('❌ Verify signup error:', error.response?.data || error.message);
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Verification failed. Please try again.'
-      );
+      return rejectWithValue(error.message);
     }
   }
 );
 
-// In your authSlice.js
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/login', {
-        user_email: credentials.user_email,
-        user_password: credentials.user_password
-      });
+      const response = await authApi.login(credentials);
 
-      // FIX: Check the actual response structure
-      const responseData = response.data;
+      // Handle timeout scenario - check if OTP was generated but email failed
+      if (response.timeout === true) {
+        // Server indicates timeout but OTP was generated
+        return {
+          user_email: credentials.user_email,
+          otp: response.otp, // Server should send OTP in timeout response
+          otp_expiry: response.otp_expiry,
+          timeout: true // Flag to indicate email may not have been sent
+        };
+      }
 
-      if (!responseData.data?.user_otp && !responseData.user_otp) {
+      if (!response.data?.user_otp && !response.user_otp) {
         throw new Error('OTP not received in response');
       }
 
       return {
         user_email: credentials.user_email,
-        otp: responseData.data?.user_otp || responseData.user_otp,
-        otp_expiry: responseData.data?.user_otp_expiry || responseData.user_otp_expiry
+        otp: response.data?.user_otp || response.user_otp,
+        otp_expiry: response.data?.user_otp_expiry || response.user_otp_expiry
       };
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        error.message ||
-        'Login failed. Please try again.'
-      );
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -149,61 +85,30 @@ export const verifyLogin = createAsyncThunk(
   'auth/verifyLogin',
   async ({ user_email, otp }, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/verify-login', {
-        user_email,
-        otp
-      });
+      const response = await authApi.verifyLogin({ user_email, otp });
 
-      console.log('🔍 Backend verify-login response:', response.data);
-
-      const token = response.data.token || response.data.data?.token || getCookieToken();
-      if (token) {
-        setAuthToken(token);
-        setCookieToken(token);
-      }
-      // Handle different response structures
-      const userData = response.data.user || response.data.data?.user;
+      const userData = response.user || response.data?.user;
+      const token = response.token || response.data?.token;
 
       if (!userData) {
-        console.error('❌ No user data in response:', response.data);
         throw new Error('No user data received');
       }
 
-      return {
-        user: userData,
-        token
-      };
+      return { user: userData, token };
     } catch (error) {
-      console.error('❌ Verify login error:', error.response?.data || error.message);
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Verification failed. Please try again.'
-      );
+      return rejectWithValue(error.message);
     }
   }
 );
 
-// In your authSlice.js - verifyAuth thunk
 export const verifyAuth = createAsyncThunk(
   'auth/verifyAuth',
   async (_, { rejectWithValue }) => {
     try {
-      const token = getAuthToken() || getCookieToken();
-      if (!token) {
-        throw new Error('No token found');
-      }
-
-      const response = await authAxios.get('/verify-token', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      return response.data.user;
+      const response = await authApi.verifyAuth();
+      return response.user;
     } catch (error) {
-      removeAuthToken();
-      removeCookieToken();
-      return rejectWithValue(
-        error.response?.data?.message || 'Authentication failed'
-      );
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -212,17 +117,26 @@ export const resendOtp = createAsyncThunk(
   'auth/resendOtp',
   async (email, { rejectWithValue }) => {
     try {
-      const response = await authAxios.post('/resend-otp', { user_email: email });
+      const response = await authApi.resendOtp(email);
       return {
         email,
-        otp: response.data.user_otp,
-        otp_expiry: response.data.user_otp_expiry
+        otp: response.user_otp,
+        otp_expiry: response.user_otp_expiry
       };
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Failed to resend OTP. Please try again.'
-      );
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await authApi.logout();
+      return true;
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -243,9 +157,8 @@ const initialState = {
   otp: '',
   token: getAuthToken(),
   isAuthenticated: !!getAuthToken() || !!getCookieToken(),
-  authChecked: false // Add this flag
+  authChecked: false
 };
-
 
 const authSlice = createSlice({
   name: 'auth',
@@ -270,82 +183,112 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
     },
-    logout: (state) => {
-      removeAuthToken();
-      removeCookieToken();
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-      state.step = 1; // Reset to login step 1
-    },
     clearError: (state) => {
       state.error = null;
     },
-    resetAuth: () => initialState
+    resetAuth: (state) => {
+      removeAuthToken();
+      removeCookieToken();
+      Object.assign(state, {
+        ...initialState,
+        token: null,
+        isAuthenticated: false,
+        authChecked: state.authChecked // Keep authChecked state
+      });
+    }
   },
   extraReducers: (builder) => {
     builder
-      // First add all .addCase() handlers
+      // Signup
       .addCase(signupUser.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.step = 2;
         state.formData.email = payload.user_email;
         toast.success('OTP sent to your email!');
       })
+
+      // Verify Signup
       .addCase(verifySignup.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.user = payload.user;
         state.token = payload.token;
         state.isAuthenticated = true;
+        state.authChecked = true;
         toast.success('Account verified successfully!');
       })
+
+      // Login
       .addCase(loginUser.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.step = 2;
-        state.formData.email = payload.data?.user_email || payload.user_email;
-        state.otp = payload.data?.user_otp || payload.otp || '';
+        state.formData.email = payload.user_email;
+        state.otp = payload.otp;
         state.error = null;
         toast.success('OTP sent to your email! Check your inbox.');
       })
+
+      // Verify Login
       .addCase(verifyLogin.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.user = payload.user;
         state.token = payload.token;
         state.isAuthenticated = true;
         state.otp = '';
+        state.authChecked = true;
         state.error = null;
         toast.success('Login successful!');
       })
+
+      // Verify Auth
       .addCase(verifyAuth.fulfilled, (state, { payload }) => {
         state.user = payload;
         state.isAuthenticated = true;
         state.loading = false;
+        state.authChecked = true;
       })
       .addCase(verifyAuth.rejected, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
         state.loading = false;
+        state.authChecked = true;
       })
+
+      // Resend OTP
       .addCase(resendOtp.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
         toast.success('New OTP sent to your email! Check your inbox.');
       })
-      // Then add .addMatcher() handlers
+
+      // Logout
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.step = 1;
+        state.loading = false;
+        toast.success('Logged out successfully!');
+      })
+
+      // Pending matcher
       .addMatcher(
-        (action) => action.type.endsWith('/pending'),
+        (action) => action.type.startsWith('auth/') && action.type.endsWith('/pending'),
         (state) => {
           state.loading = true;
           state.error = null;
         }
       )
+
+      // Rejected matcher
       .addMatcher(
-        (action) => action.type.endsWith('/rejected'),
+        (action) => action.type.startsWith('auth/') && action.type.endsWith('/rejected'),
         (state, { payload }) => {
           state.loading = false;
           state.error = payload;
-          toast.error(payload);
+          if (payload) {
+            toast.error(payload);
+          }
         }
       );
   }
@@ -356,10 +299,9 @@ export const {
   updateFormData,
   setOtp,
   setToken,
-  setUser,  // Add this to exports
+  setUser,
   resetAuth,
   clearError,
-  logout,
 } = authSlice.actions;
 
 export default authSlice.reducer;

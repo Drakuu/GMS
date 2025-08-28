@@ -1,75 +1,123 @@
 // store/slices/userSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { userApi } from '@/services/userApi';
 
-// GET /users/get-all-users
+// Async thunks using the new service pattern
 export const fetchAllUsers = createAsyncThunk(
-   'user/fetchAll',
-   async (params = {}, { getState, rejectWithValue }) => {
+   'users/fetchAll',
+   async (params = {}, { rejectWithValue }) => {
       try {
-         const { page = 1, limit = 20, q = '', role = '' } = params;
-         const { token } = getState().auth;
-         const qs = new URLSearchParams({ page, limit, q, role });
-         const res = await axios.get(`/users/get-all-users?${qs.toString()}`, {
-            headers: { Authorization: `Bearer ${token}` },
-         });
-         return res.data.data; // { users, pagination }
-      } catch (err) {
-         return rejectWithValue(err.response?.data || err.message);
+         return await userApi.getUsers(params);
+      } catch (error) {
+         return rejectWithValue(error.message);
       }
    }
 );
 
-// GET /users/get-user-by-id?id=...
 export const fetchUserById = createAsyncThunk(
-   'user/fetchById',
-   async (userId, { getState, rejectWithValue }) => {
+   'users/fetchById',
+   async (userId, { rejectWithValue }) => {
       try {
-         const { token } = getState().auth;
-         const res = await axios.get(`/users/get-user-by-id?id=${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-         });
-         return res.data.data.user;
-      } catch (err) {
-         return rejectWithValue(err.response?.data || err.message);
+         return await userApi.getUserById(userId);
+      } catch (error) {
+         return rejectWithValue(error.message);
       }
    }
 );
 
-// PATCH /users/update-user?id=...
 export const updateUser = createAsyncThunk(
-   'user/update',
-   async ({ userId, userData }, { getState, rejectWithValue }) => {
+   'users/update',
+   async ({ userId, userData }, { rejectWithValue }) => {
       try {
-         const { token } = getState().auth;
-         const res = await axios.patch(
-            `/users/update-user?id=${userId}`,
-            userData,
-            { headers: { Authorization: `Bearer ${token}` } }
-         );
-         return res.data.data.user;
-      } catch (err) {
-         return rejectWithValue(err.response?.data || err.message);
+         return await userApi.updateUser(userId, userData);
+      } catch (error) {
+         return rejectWithValue(error.message);
       }
    }
 );
+
+export const deleteUser = createAsyncThunk(
+   'users/delete',
+   async (userId, { rejectWithValue }) => {
+      try {
+         return await userApi.deleteUser(userId);
+      } catch (error) {
+         return rejectWithValue(error.message);
+      }
+   }
+);
+
+export const fetchUsersByRole = createAsyncThunk(
+   'users/fetchByRole',
+   async (role, { rejectWithValue }) => {
+      try {
+         return await userApi.getUsersByRole(role);
+      } catch (error) {
+         return rejectWithValue(error.message);
+      }
+   }
+);
+
+export const searchUsers = createAsyncThunk(
+   'users/search',
+   async (query, { rejectWithValue }) => {
+      try {
+         return await userApi.searchUsers(query);
+      } catch (error) {
+         return rejectWithValue(error.message);
+      }
+   }
+);
+
+const initialState = {
+   users: [], // Changed from 'list' to 'users' for consistency
+   currentUser: null, // Changed from 'currentProfile' to 'currentUser'
+   usersByRole: [],
+   searchResults: [],
+   pagination: {
+      page: 1,
+      limit: 20,
+      total: 0,
+      pages: 0
+   },
+   loading: false,
+   error: null,
+   filters: {
+      q: '',
+      role: ''
+   }
+};
 
 const userSlice = createSlice({
-   name: 'user',
-   initialState: {
-      list: [],
-      pagination: { page: 1, limit: 20, total: 0, pages: 0 },
-      currentProfile: null,
-      loading: false,
-      error: null,
-   },
+   name: 'users', // Changed from 'user' to 'users' for consistency
+   initialState,
    reducers: {
-      clearUserProfile: (state) => {
-         state.currentProfile = null;
+      clearCurrentUser: (state) => {
+         state.currentUser = null;
       },
       clearError: (state) => {
          state.error = null;
       },
+      clearSearchResults: (state) => {
+         state.searchResults = [];
+      },
+      clearUsersByRole: (state) => {
+         state.usersByRole = [];
+      },
+      setFilters: (state, action) => {
+         state.filters = { ...state.filters, ...action.payload };
+      },
+      resetFilters: (state) => {
+         state.filters = { q: '', role: '' };
+      },
+      // Update user in list without refetching
+      updateUserInList: (state, action) => {
+         const updatedUser = action.payload;
+         const index = state.users.findIndex(user => user._id === updatedUser._id);
+         if (index !== -1) {
+            state.users[index] = updatedUser;
+         }
+      }
    },
    extraReducers: (builder) => {
       builder
@@ -80,7 +128,7 @@ const userSlice = createSlice({
          })
          .addCase(fetchAllUsers.fulfilled, (state, action) => {
             state.loading = false;
-            state.list = action.payload.users || [];
+            state.users = action.payload.users || [];
             state.pagination = action.payload.pagination || state.pagination;
          })
          .addCase(fetchAllUsers.rejected, (state, action) => {
@@ -95,7 +143,7 @@ const userSlice = createSlice({
          })
          .addCase(fetchUserById.fulfilled, (state, action) => {
             state.loading = false;
-            state.currentProfile = action.payload;
+            state.currentUser = action.payload;
          })
          .addCase(fetchUserById.rejected, (state, action) => {
             state.loading = false;
@@ -109,18 +157,47 @@ const userSlice = createSlice({
          })
          .addCase(updateUser.fulfilled, (state, action) => {
             state.loading = false;
-            state.currentProfile = action.payload;
+            state.currentUser = action.payload;
 
-            // also update the item in list if present
-            const idx = state.list.findIndex(u => String(u._id) === String(action.payload?._id));
-            if (idx !== -1) state.list[idx] = action.payload;
+            // Update the user in the main list
+            const index = state.users.findIndex(user => String(user._id) === String(action.payload._id));
+            if (index !== -1) {
+               state.users[index] = action.payload;
+            }
          })
          .addCase(updateUser.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
+         })
+
+         // deleteUser
+         .addCase(deleteUser.fulfilled, (state, action) => {
+            state.users = state.users.filter(user => user._id !== action.meta.arg);
+            if (state.currentUser && state.currentUser._id === action.meta.arg) {
+               state.currentUser = null;
+            }
+         })
+
+         // fetchUsersByRole
+         .addCase(fetchUsersByRole.fulfilled, (state, action) => {
+            state.usersByRole = action.payload.users || [];
+         })
+
+         // searchUsers
+         .addCase(searchUsers.fulfilled, (state, action) => {
+            state.searchResults = action.payload.users || [];
          });
-   },
+   }
 });
 
-export const { clearUserProfile, clearError } = userSlice.actions;
+export const {
+   clearCurrentUser,
+   clearError,
+   clearSearchResults,
+   clearUsersByRole,
+   setFilters,
+   resetFilters,
+   updateUserInList
+} = userSlice.actions;
+
 export default userSlice.reducer;
