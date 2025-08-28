@@ -6,7 +6,7 @@ export const subscriptionPlanApi = {
    // Create a new subscription plan
    createPlan: async (planData) => {
       try {
-         const response = await axiosInstance.post('/subscription-plans', planData);
+         const response = await axiosInstance.post('/subscription-plans/create', planData);
          return response.data;
       } catch (error) {
          return handleApiError(error);
@@ -17,7 +17,7 @@ export const subscriptionPlanApi = {
    getPlans: async ({ page = 1, limit = 20, q = '', status = '' } = {}) => {
       try {
          const queryParams = buildQueryString({ page, limit, q, status });
-         const response = await axiosInstance.get(`/subscription-plans${queryParams}`);
+         const response = await axiosInstance.get(`/subscription-plans/get-all${queryParams}`);
          return response.data;
       } catch (error) {
          return handleApiError(error);
@@ -27,7 +27,7 @@ export const subscriptionPlanApi = {
    // Get a single subscription plan by ID
    getPlanById: async (id) => {
       try {
-         const response = await axiosInstance.get(`/subscription-plans?id=${id}`);
+         const response = await axiosInstance.get(`/subscription-plans/get-by-id?id=${id}`);
          return response.data;
       } catch (error) {
          return handleApiError(error);
@@ -37,7 +37,7 @@ export const subscriptionPlanApi = {
    // Update a subscription plan
    updatePlan: async (id, updateData) => {
       try {
-         const response = await axiosInstance.patch(`/subscription-plans?id=${id}`, updateData);
+         const response = await axiosInstance.patch(`/subscription-plans/update?id=${id}`, updateData);
          return response.data;
       } catch (error) {
          return handleApiError(error);

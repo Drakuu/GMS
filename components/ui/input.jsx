@@ -5,9 +5,12 @@ import { cn } from "@/lib/utils"
 function Input({
   className,
   type,
+  error,
   ...props
 }) {
   return (
+    <>
+   
     <input
       type={type}
       data-slot="input"
@@ -18,6 +21,8 @@ function Input({
         className
       )}
       {...props} />
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+       </>
   );
 }
 

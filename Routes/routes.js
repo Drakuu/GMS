@@ -25,8 +25,8 @@ export const SIDEBAR_ROUTES = {
             icon: <LayoutDashboard size={18} />,
           },
           {
-            name: 'Suscription and Billing',
-            path: '/super-admin/subcription-and-billing',
+            name: 'Suscription Plans',
+            path: '/super-admin/subscription-plans',
             icon: <CreditCard size={18} />,
           },
           {
