@@ -13,6 +13,13 @@
 # testing
 /coverage
 
+# Next.js build output
+.next/
+
+# Any .next in the repo
+**/.next/
+
+
 # next.js
 /.next/
 /out/
@@ -31,7 +38,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+# .env*
 
 # vercel
 .vercel

@@ -1,10 +1,19 @@
-// app/(auth)/layout.jsx
-export default function AuthLayout({ children }) {
+"use client";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/sonner";
+
+export default function AuthLayout({ children, title }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
-        {children}
-      </div>
+    <div className="my-auto min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {children}
+        </CardContent>
+      </Card>
+      <Toaster position="top-center" />
     </div>
   );
 }

@@ -1,84 +1,266 @@
-// // app/(auth)/login/page.jsx
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
-// import { Label } from '@/components/ui/label';
-
-// export default function LoginPage() {
-//   return (
-//     <Card>
-//       <CardHeader className="space-y-1">
-//         <CardTitle className="text-2xl">Login to your account</CardTitle>
-//       </CardHeader>
-//       <CardContent>
-//         <form className="space-y-4">
-//           <div className="space-y-2">
-//             <Label htmlFor="email">Email</Label>
-//             <Input id="email" type="email" placeholder="you@example.com" />
-//           </div>
-//           <div className="space-y-2">
-//             <Label htmlFor="password">Password</Label>
-//             <Input id="password" type="password" />
-//           </div>
-//           <Button className="w-full">Sign In</Button>
-//         </form>
-        
-//         <div className="mt-4 text-center text-sm">
-//           Don't have an account?{' '}
-//           <a href="/auth/register" className="underline text-primary">
-//             Register
-//           </a>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-
-// app/(auth)/login/page.jsx
-'use client';
-'use client';
-
+"use client";
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  loginUser,
+  verifyLogin,
+  setStep,
+  setOtp,
+  resendOtp,
+  clearError
+} from '@/store/slices/authSlice';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import AuthLayout from '../layout';
+import { useEffect, useState } from 'react';
+import { OtpVerificationForm } from '../components/OtpVerificationForm';
+import { ROLES } from '@/Routes/constants';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { verifyAuth } from '@/store/slices/authSlice';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('super-admin');
+  const dispatch = useDispatch();
+  const { step, loading, error } = useSelector((state) => state.auth);
+  const [formData, setFormData] = useState({
+    user_email: '',
+    user_password: ''
+  });
 
-  const handleLogin = () => {
-    // Simulate login and redirect based on role
-    if (role === 'super-admin') router.push('/super-admin/dashboard');
-    else if (role === 'admin') router.push('/admin/dashboard');
-    else router.push('/user/dashboard');
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.user_email || !formData.user_password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    // Clear previous errors
+    dispatch(clearError());
+
+    try {
+      await dispatch(loginUser(formData));
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error('An error occurred during login');
+    }
+  };
+
+  if (step === 2) {
+    return <OtpVerification
+      email={formData.user_email}
+      onBack={() => dispatch(setStep(1))}
+    />;
+  }
+
+  return (
+    <AuthLayout title="Login to your account">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="user_email">Email</Label>
+          <Input
+            id="user_email"
+            name="user_email"
+            type="email"
+            value={formData.user_email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="user_password">Password</Label>
+          <Input
+            id="user_password"
+            name="user_password"
+            type="password"
+            value={formData.user_password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error}
+              {error.includes('Email service') && (
+                <div className="mt-2">
+                  <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    Try Again
+                  </Button>
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing In...
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </form>
+
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        Don't have an account?{' '}
+        <Link href="/signup" className="underline text-primary">
+          Register
+        </Link>
+      </div>
+    </AuthLayout>
+  );
+}
+
+const OtpVerification = ({ email, onBack }) => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { otp, loading, error, user } = useSelector((state) => state.auth); // Get user from state
+
+  // Reset error state when component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  // Debugging
+  useEffect(() => {
+    console.log('Current OTP state:', {
+      email,
+      otp,
+      loading,
+      error
+    });
+  }, [email, otp, loading, error]);
+
+  // Debug state
+  useEffect(() => {
+    console.log('OTP Verification State:', { email, otp, loading, error });
+  }, [email, otp, loading, error]);
+
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    dispatch(setOtp(value));
+  };
+
+  // In your login page component
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    dispatch(clearError());
+    try {
+      const result = await dispatch(verifyLogin({
+        user_email: email,
+        otp
+      }));
+
+      console.log('🔍 Verify login result:', result);
+
+      if (verifyLogin.fulfilled.match(result)) {
+        console.log('✅ Login successful, payload:', result.payload);
+
+        // Debug: Check the actual structure
+        console.log('📋 User object:', result.payload.user);
+        console.log('🎭 User role:', result.payload.user?.user_role);
+        console.log('🔑 Token:', result.payload.token);
+
+        toast.success('Login successful!');
+
+        // Use the user data from the verifyLogin response
+        const userRole = result.payload.user?.user_role;
+
+        if (!userRole) {
+          console.error('❌ No user role found in response');
+          // Fallback: try to get user data from state after a short delay
+          setTimeout(() => {
+            const currentUser = useSelector(state => state.auth.user);
+            console.log('🔄 Fallback user from state:', currentUser);
+            if (currentUser?.user_role) {
+              redirectBasedOnRole(currentUser.user_role);
+            } else {
+              router.push('/dashboard');
+            }
+          }, 100);
+          return;
+        }
+
+        // Redirect based on role
+        redirectBasedOnRole(userRole);
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+    }
+  };
+
+  // Helper function for redirection
+  const redirectBasedOnRole = (userRole) => {
+    console.log('🔄 Redirecting based on role:', userRole);
+
+    if (userRole === ROLES.ADMIN) {
+      router.push('/admin/dashboard');
+    } else if (userRole === ROLES.SUPER_ADMIN) {
+      router.push('/super-admin/dashboard');
+    } else if (userRole === ROLES.TRAINER) {
+      router.push('/trainer/dashboard');
+    } else if (userRole === ROLES.MEMBER) {
+      router.push('/member/dashboard');
+    } else {
+      console.log('⚠️ Unknown role, redirecting to /dashboard');
+      router.push('/dashboard');
+    }
+  };
+
+
+  const handleResend = async () => {
+    try {
+      const result = await dispatch(resendOtp({ user_email: email }));
+      if (result.payload) {
+        toast.success('New OTP sent to your email!');
+      }
+    } catch (error) {
+      console.error("Resend error:", error);
+    }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-50">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border mb-2 rounded"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <select
-          className="w-full p-2 border mb-4 rounded"
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <option value="super-admin">Super Admin</option>
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-        </select>
-        <button
-          className="bg-black text-white w-full py-2 rounded hover:bg-gray-800"
-          onClick={handleLogin}
-        >
-          Login
-        </button>
-      </div>
+    <div className="space-y-4">
+      <button
+        onClick={onBack}
+        className="text-sm text-muted-foreground hover:text-primary"
+      >
+        ← Back to login
+      </button>
+
+      <OtpVerificationForm
+        email={email}
+        otp={otp}
+        handleOtpChange={handleOtpChange}
+        onSubmit={handleVerify}
+        onResendOtp={handleResend}
+        loading={loading}
+        error={error}
+      />
     </div>
   );
-}
+};
