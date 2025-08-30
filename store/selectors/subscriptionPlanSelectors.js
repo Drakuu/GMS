@@ -25,6 +25,7 @@ export const selectCurrentPlan = (state) => state.subscriptionPlans.currentPlan;
 export const selectPlanLoading = (state) => state.subscriptionPlans.loading;
 export const selectPlanError = (state) => state.subscriptionPlans.error;
 export const selectPlanPagination = (state) => state.subscriptionPlans.pagination;
+export const selectCurrentSubscriptionPlan = selectCurrentPlan;
 // export const selectPlanFilters = (state) => state.subscriptionPlans.filters;
 
 export const selectPlanById = (id) => (state) =>

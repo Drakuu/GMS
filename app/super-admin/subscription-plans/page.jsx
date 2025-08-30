@@ -65,8 +65,8 @@ export default function SubscriptionPlansPage() {
     dispatch(setFilters({ page: n }));
   };
 
-  const handleCreateNew = () => router.push('/subscription-plans/create');
-  const handleViewDetails = (id) => router.push(`/subscription-plans/${id}`);
+  const handleCreateNew = () => router.push('/super-admin/subscription-plans/create');
+  const handleViewDetails = (id) => router.push(`/super-admin/subscription-plans/${id}`);
 
   const hasPlans = Array.isArray(plans) && plans.length > 0;
   if (loading && !hasPlans) return <Loading />;

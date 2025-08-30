@@ -8,12 +8,11 @@ import {
    createSubscriptionPlan,
    updateSubscriptionPlan,
    fetchSubscriptionPlanById,
-   selectCurrentSubscriptionPlan,
-   selectPlanLoading
 } from '@/store/slices/subscriptionPlanSlice';
+import { selectCurrentSubscriptionPlan, selectPlanLoading } from '@/store/selectors/subscriptionPlanSelectors'
 import SubscriptionHeader from '../components/SubscriptionHeader';
 import SubscriptionForm from '../components/SubscriptionForm';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save } from 'lucide-react';
 
 const CreateSubscriptionPlanPage = () => {
@@ -32,12 +31,23 @@ const CreateSubscriptionPlanPage = () => {
       currency: 'USD',
       price: 0,
       interval: 'month',
-      trialDays: 0,
+      trialDays: 14,
       stripePriceId: '',
       stripeProductId: '',
-      features: [],
-      limits: {},
-      status: 'active'
+      features: {
+         pos: true,
+         classes: true,
+         crm: false,
+         checkin: true,
+         reports: true,
+         apiAccess: false,
+      },
+      limits: {
+         maxStaff: 10,
+         maxMembers: 1000,
+         branches: 1,
+      },
+      status: 'Active'
    });
 
    useEffect(() => {
@@ -75,14 +85,14 @@ const CreateSubscriptionPlanPage = () => {
             await dispatch(createSubscriptionPlan(formData)).unwrap();
          }
 
-         router.push('/subscription-plans');
+         router.push('/super-admin/subscription-plans');
       } catch (error) {
          console.error('Failed to save plan:', error);
       }
    };
 
    const handleBack = () => {
-      router.push('/subscription-plans');
+      router.push('/super-admin/subscription-plans');
    };
 
    return (
@@ -99,7 +109,7 @@ const CreateSubscriptionPlanPage = () => {
             />
          </div>
 
-         <div className="bg-white rounded-lg shadow-md p-6">
+         <div className="bg-gray-800 rounded-lg shadow-md p-6">
             <SubscriptionForm
                formData={formData}
                onChange={setFormData}

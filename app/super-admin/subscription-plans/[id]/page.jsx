@@ -4,20 +4,20 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter, useParams } from 'next/navigation';
-import {
-   fetchSubscriptionPlanById,
-   selectCurrentSubscriptionPlan,
-   selectPlanLoading
-} from '@/store/slices/subscriptionPlanSlice';
 import SubscriptionHeader from '../components/SubscriptionHeader';
-import { Button } from '@/components/ui/Button';
+import { fetchSubscriptionPlanById } from '@/store/slices/subscriptionPlanSlice';
+import {
+   selectCurrentPlan,
+   selectPlanLoading
+} from '@/store/selectors/subscriptionPlanSelectors';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
 
 const SubscriptionPlanDetailPage = () => {
    const dispatch = useDispatch();
    const router = useRouter();
    const params = useParams();
-   const plan = useSelector(selectCurrentSubscriptionPlan);
+   const plan = useSelector(selectCurrentPlan);
    const loading = useSelector(selectPlanLoading);
    const planId = params.id;
 
@@ -69,7 +69,7 @@ const SubscriptionPlanDetailPage = () => {
             </Button>
          </div>
 
-         <div className="bg-white rounded-lg shadow-md p-6">
+         <div className="bg-gray-800 rounded-lg shadow-md p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div>
                   <h3 className="text-lg font-semibold mb-4">Plan Details</h3>
@@ -110,17 +110,38 @@ const SubscriptionPlanDetailPage = () => {
                </div>
             </div>
 
-            {plan.features && plan.features.length > 0 && (
+            {/* Features */}
+            {plan.features && (
                <div className="mt-6">
                   <h3 className="text-lg font-semibold mb-4">Features</h3>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                     {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2">
-                           <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                           {feature}
-                        </li>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     {Object.entries(plan.features).map(([feature, enabled]) => (
+                        <div key={feature} className="flex items-center gap-2">
+                           <span className={`w-2 h-2 rounded-full ${enabled ? 'bg-green-500' : 'bg-gray-500'}`}></span>
+                           <span className="capitalize">{feature.replace(/([A-Z])/g, ' $1')}: </span>
+                           <span className={enabled ? 'text-green-400' : 'text-gray-400'}>
+                              {enabled ? 'Enabled' : 'Disabled'}
+                           </span>
+                        </div>
                      ))}
-                  </ul>
+                  </div>
+               </div>
+            )}
+
+            {/* Limits */}
+            {plan.limits && (
+               <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">Limits</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     {Object.entries(plan.limits).map(([limit, value]) => (
+                        <div key={limit} className="bg-gray-700 p-4 rounded-lg">
+                           <span className="text-sm text-gray-400 capitalize block mb-1">
+                              {limit.replace(/([A-Z])/g, ' $1')}
+                           </span>
+                           <span className="text-xl font-bold text-white">{value}</span>
+                        </div>
+                     ))}
+                  </div>
                </div>
             )}
          </div>

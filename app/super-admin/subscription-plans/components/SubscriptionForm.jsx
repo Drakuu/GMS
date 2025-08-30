@@ -1,11 +1,11 @@
 // app/super-admin/subscription-plans/components/SubscriptionForm.jsx
 import React from 'react';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
-import { Switch } from '@/components/ui/Switch';
-import { Label } from '@/components/ui/Label';
-
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 const SubscriptionForm = ({
    formData,
@@ -18,19 +18,24 @@ const SubscriptionForm = ({
       onChange({ ...formData, [field]: value });
    };
 
-   const handleFeatureChange = (index, value) => {
-      const newFeatures = [...formData.features];
-      newFeatures[index] = value;
-      onChange({ ...formData, features: newFeatures });
+   const handleFeatureToggle = (feature, value) => {
+      onChange({
+         ...formData,
+         features: {
+            ...formData.features,
+            [feature]: value
+         }
+      });
    };
 
-   const addFeature = () => {
-      onChange({ ...formData, features: [...formData.features, ''] });
-   };
-
-   const removeFeature = (index) => {
-      const newFeatures = formData.features.filter((_, i) => i !== index);
-      onChange({ ...formData, features: newFeatures });
+   const handleLimitChange = (limit, value) => {
+      onChange({
+         ...formData,
+         limits: {
+            ...formData.limits,
+            [limit]: parseInt(value) || 0
+         }
+      });
    };
 
    return (
@@ -44,7 +49,7 @@ const SubscriptionForm = ({
                   <Label htmlFor="key">Plan Key *</Label>
                   <Input
                      id="key"
-                     value={formData.key}
+                     value={formData.key || ''}
                      onChange={(e) => handleInputChange('key', e.target.value)}
                      placeholder="e.g., premium-monthly"
                      required
@@ -57,7 +62,7 @@ const SubscriptionForm = ({
                   <Label htmlFor="name">Plan Name *</Label>
                   <Input
                      id="name"
-                     value={formData.name}
+                     value={formData.name || ''}
                      onChange={(e) => handleInputChange('name', e.target.value)}
                      placeholder="e.g., Premium Monthly"
                      required
@@ -68,7 +73,7 @@ const SubscriptionForm = ({
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                      id="description"
-                     value={formData.description}
+                     value={formData.description || ''}
                      onChange={(e) => handleInputChange('description', e.target.value)}
                      placeholder="Describe what this plan includes..."
                      rows={3}
@@ -84,17 +89,20 @@ const SubscriptionForm = ({
                   <div>
                      <Label htmlFor="currency">Currency *</Label>
                      <Select
-                        id="currency"
-                        value={formData.currency}
-                        onChange={(e) => handleInputChange('currency', e.target.value)}
-                        options={[
-                           { value: 'USD', label: 'USD' },
-                           { value: 'EUR', label: 'EUR' },
-                           { value: 'GBP', label: 'GBP' },
-                           { value: 'INR', label: 'INR' }
-                        ]}
+                        value={formData.currency || 'USD'}
+                        onValueChange={(value) => handleInputChange('currency', value)}
                         required
-                     />
+                     >
+                        <SelectTrigger>
+                           <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="USD">USD</SelectItem>
+                           <SelectItem value="EUR">EUR</SelectItem>
+                           <SelectItem value="GBP">GBP</SelectItem>
+                           <SelectItem value="INR">INR</SelectItem>
+                        </SelectContent>
+                     </Select>
                   </div>
 
                   <div>
@@ -102,8 +110,8 @@ const SubscriptionForm = ({
                      <Input
                         id="price"
                         type="number"
-                        value={formData.price}
-                        onChange={(e) => handleInputChange('price', parseFloat(e.target.value))}
+                        value={formData.price || ''}
+                        onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
                         placeholder="0.00"
                         min="0"
                         step="0.01"
@@ -115,17 +123,18 @@ const SubscriptionForm = ({
                <div>
                   <Label htmlFor="interval">Billing Interval *</Label>
                   <Select
-                     id="interval"
-                     value={formData.interval}
-                     onChange={(e) => handleInputChange('interval', e.target.value)}
-                     options={[
-                        { value: 'day', label: 'Daily' },
-                        { value: 'week', label: 'Weekly' },
-                        { value: 'month', label: 'Monthly' },
-                        { value: 'year', label: 'Yearly' }
-                     ]}
+                     value={formData.interval || 'month'}
+                     onValueChange={(value) => handleInputChange('interval', value)}
                      required
-                  />
+                  >
+                     <SelectTrigger>
+                        <SelectValue placeholder="Select interval" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="month">Monthly</SelectItem>
+                        <SelectItem value="year">Yearly</SelectItem>
+                     </SelectContent>
+                  </Select>
                </div>
 
                <div>
@@ -133,8 +142,8 @@ const SubscriptionForm = ({
                   <Input
                      id="trialDays"
                      type="number"
-                     value={formData.trialDays}
-                     onChange={(e) => handleInputChange('trialDays', parseInt(e.target.value))}
+                     value={formData.trialDays || 0}
+                     onChange={(e) => handleInputChange('trialDays', parseInt(e.target.value) || 0)}
                      placeholder="0"
                      min="0"
                   />
@@ -151,7 +160,7 @@ const SubscriptionForm = ({
                   <Label htmlFor="stripePriceId">Stripe Price ID</Label>
                   <Input
                      id="stripePriceId"
-                     value={formData.stripePriceId}
+                     value={formData.stripePriceId || ''}
                      onChange={(e) => handleInputChange('stripePriceId', e.target.value)}
                      placeholder="price_xxxxxxxxxxxxxx"
                   />
@@ -161,7 +170,7 @@ const SubscriptionForm = ({
                   <Label htmlFor="stripeProductId">Stripe Product ID</Label>
                   <Input
                      id="stripeProductId"
-                     value={formData.stripeProductId}
+                     value={formData.stripeProductId || ''}
                      onChange={(e) => handleInputChange('stripeProductId', e.target.value)}
                      placeholder="prod_xxxxxxxxxxxxxx"
                   />
@@ -171,34 +180,102 @@ const SubscriptionForm = ({
 
          {/* Features */}
          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-               <h3 className="text-lg font-semibold">Features</h3>
-               <button
-                  type="button"
-                  onClick={addFeature}
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-               >
-                  + Add Feature
-               </button>
-            </div>
+            <h3 className="text-lg font-semibold">Features</h3>
 
-            <div className="space-y-2">
-               {formData.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                     <Input
-                        value={feature}
-                        onChange={(e) => handleFeatureChange(index, e.target.value)}
-                        placeholder={`Feature ${index + 1}`}
-                     />
-                     <button
-                        type="button"
-                        onClick={() => removeFeature(index)}
-                        className="text-red-600 hover:text-red-700 p-2"
-                     >
-                        ×
-                     </button>
-                  </div>
-               ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="flex items-center gap-2">
+                  <Switch
+                     id="pos"
+                     checked={formData.features?.pos || false}
+                     onCheckedChange={(checked) => handleFeatureToggle('pos', checked)}
+                  />
+                  <Label htmlFor="pos" className="cursor-pointer">Point of Sale (POS)</Label>
+               </div>
+
+               <div className="flex items-center gap-2">
+                  <Switch
+                     id="classes"
+                     checked={formData.features?.classes || false}
+                     onCheckedChange={(checked) => handleFeatureToggle('classes', checked)}
+                  />
+                  <Label htmlFor="classes" className="cursor-pointer">Classes Management</Label>
+               </div>
+
+               <div className="flex items-center gap-2">
+                  <Switch
+                     id="crm"
+                     checked={formData.features?.crm || false}
+                     onCheckedChange={(checked) => handleFeatureToggle('crm', checked)}
+                  />
+                  <Label htmlFor="crm" className="cursor-pointer">CRM</Label>
+               </div>
+
+               <div className="flex items-center gap-2">
+                  <Switch
+                     id="checkin"
+                     checked={formData.features?.checkin || false}
+                     onCheckedChange={(checked) => handleFeatureToggle('checkin', checked)}
+                  />
+                  <Label htmlFor="checkin" className="cursor-pointer">Check-in System</Label>
+               </div>
+
+               <div className="flex items-center gap-2">
+                  <Switch
+                     id="reports"
+                     checked={formData.features?.reports || false}
+                     onCheckedChange={(checked) => handleFeatureToggle('reports', checked)}
+                  />
+                  <Label htmlFor="reports" className="cursor-pointer">Reports</Label>
+               </div>
+
+               <div className="flex items-center gap-2">
+                  <Switch
+                     id="apiAccess"
+                     checked={formData.features?.apiAccess || false}
+                     onCheckedChange={(checked) => handleFeatureToggle('apiAccess', checked)}
+                  />
+                  <Label htmlFor="apiAccess" className="cursor-pointer">API Access</Label>
+               </div>
+            </div>
+         </div>
+
+         {/* Limits */}
+         <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Limits</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+               <div>
+                  <Label htmlFor="maxStaff">Max Staff</Label>
+                  <Input
+                     id="maxStaff"
+                     type="number"
+                     value={formData.limits?.maxStaff || 0}
+                     onChange={(e) => handleLimitChange('maxStaff', e.target.value)}
+                     min="0"
+                  />
+               </div>
+
+               <div>
+                  <Label htmlFor="maxMembers">Max Members</Label>
+                  <Input
+                     id="maxMembers"
+                     type="number"
+                     value={formData.limits?.maxMembers || 0}
+                     onChange={(e) => handleLimitChange('maxMembers', e.target.value)}
+                     min="0"
+                  />
+               </div>
+
+               <div>
+                  <Label htmlFor="branches">Max Branches</Label>
+                  <Input
+                     id="branches"
+                     type="number"
+                     value={formData.limits?.branches || 0}
+                     onChange={(e) => handleLimitChange('branches', e.target.value)}
+                     min="0"
+                  />
+               </div>
             </div>
          </div>
 
@@ -206,13 +283,13 @@ const SubscriptionForm = ({
          <div className="flex items-center gap-2">
             <Switch
                id="status"
-               checked={formData.status === 'active'}
+               checked={formData.status === 'Active'}
                onCheckedChange={(checked) =>
-                  handleInputChange('status', checked ? 'active' : 'inactive')
+                  handleInputChange('status', checked ? 'Active' : 'Archived')
                }
             />
             <Label htmlFor="status" className="cursor-pointer">
-               {formData.status === 'active' ? 'Active' : 'Inactive'}
+               {formData.status === 'Active' ? 'Active' : 'Archived'}
             </Label>
          </div>
       </form>

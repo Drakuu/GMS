@@ -18,8 +18,9 @@ export const subscriptionPlanApi = {
       try {
          const queryParams = buildQueryString({ page, limit, q, status });
          const response = await axiosInstance.get(`/subscription-plans/get-all${queryParams}`);
-         console.log('Fetched plans:', response.data); // Debug log
-         return response.data;
+         console.log('Fetched plans:', response.data.data); // Debug log
+
+         return response.data.data;
       } catch (error) {
          return handleApiError(error);
       }
@@ -29,7 +30,7 @@ export const subscriptionPlanApi = {
    getPlanById: async (id) => {
       try {
          const response = await axiosInstance.get(`/subscription-plans/get-by-id?id=${id}`);
-         return response.data;
+         return response.data.data;
       } catch (error) {
          return handleApiError(error);
       }
