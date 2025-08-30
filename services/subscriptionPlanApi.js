@@ -18,6 +18,7 @@ export const subscriptionPlanApi = {
       try {
          const queryParams = buildQueryString({ page, limit, q, status });
          const response = await axiosInstance.get(`/subscription-plans/get-all${queryParams}`);
+         console.log('Fetched plans:', response.data); // Debug log
          return response.data;
       } catch (error) {
          return handleApiError(error);
