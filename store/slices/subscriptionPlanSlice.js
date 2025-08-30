@@ -101,7 +101,11 @@ const subscriptionPlanSlice = createSlice({
          })
          .addCase(createSubscriptionPlan.fulfilled, (state, action) => {
             state.loading = false;
-            state.plans.unshift(action.payload.plan);
+            const response = action.payload;
+            const newPlan = response.data?.plan || response.plan;
+            if (newPlan) {
+               state.plans.unshift(newPlan);
+            }
          })
          .addCase(createSubscriptionPlan.rejected, (state, action) => {
             state.loading = false;
@@ -115,8 +119,14 @@ const subscriptionPlanSlice = createSlice({
          })
          .addCase(fetchSubscriptionPlans.fulfilled, (state, action) => {
             state.loading = false;
-            state.plans = action.payload.plans;
-            state.pagination = action.payload.pagination;
+            const response = action.payload;
+            state.plans = response.data?.plans || response.plans || [];
+            state.pagination = response.data?.pagination || response.pagination || {
+               page: 1,
+               limit: 20,
+               total: 0,
+               pages: 0
+            };
          })
          .addCase(fetchSubscriptionPlans.rejected, (state, action) => {
             state.loading = false;
@@ -130,7 +140,8 @@ const subscriptionPlanSlice = createSlice({
          })
          .addCase(fetchSubscriptionPlanById.fulfilled, (state, action) => {
             state.loading = false;
-            state.currentPlan = action.payload.plan;
+            const response = action.payload;
+            state.currentPlan = response.data?.plan || response.plan || null;
          })
          .addCase(fetchSubscriptionPlanById.rejected, (state, action) => {
             state.loading = false;
@@ -144,13 +155,16 @@ const subscriptionPlanSlice = createSlice({
          })
          .addCase(updateSubscriptionPlan.fulfilled, (state, action) => {
             state.loading = false;
-            const updatedPlan = action.payload.plan;
-            const index = state.plans.findIndex(plan => plan._id === updatedPlan._id);
-            if (index !== -1) {
-               state.plans[index] = updatedPlan;
-            }
-            if (state.currentPlan && state.currentPlan._id === updatedPlan._id) {
-               state.currentPlan = updatedPlan;
+            const response = action.payload;
+            const updatedPlan = response.data?.plan || response.plan;
+            if (updatedPlan) {
+               const index = state.plans.findIndex(plan => plan._id === updatedPlan._id);
+               if (index !== -1) {
+                  state.plans[index] = updatedPlan;
+               }
+               if (state.currentPlan && state.currentPlan._id === updatedPlan._id) {
+                  state.currentPlan = updatedPlan;
+               }
             }
          })
          .addCase(updateSubscriptionPlan.rejected, (state, action) => {

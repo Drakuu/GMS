@@ -9,7 +9,7 @@ import {
    updateSubscriptionPlan,
    fetchSubscriptionPlanById,
 } from '@/store/slices/subscriptionPlanSlice';
-import { selectCurrentSubscriptionPlan, selectPlanLoading } from '@/store/selectors/subscriptionPlanSelectors'
+import { selectCurrentPlan, selectPlanLoading } from '@/store/selectors/subscriptionPlanSelectors';
 import SubscriptionHeader from '../components/SubscriptionHeader';
 import SubscriptionForm from '../components/SubscriptionForm';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ const CreateSubscriptionPlanPage = () => {
    const dispatch = useDispatch();
    const router = useRouter();
    const searchParams = useSearchParams();
-   const plan = useSelector(selectCurrentSubscriptionPlan);
+   const plan = useSelector(selectCurrentPlan);
    const loading = useSelector(selectPlanLoading);
    const planId = searchParams.get('id');
    const isEditMode = Boolean(planId);
@@ -68,9 +68,20 @@ const CreateSubscriptionPlanPage = () => {
             trialDays: plan.trialDays || 0,
             stripePriceId: plan.stripePriceId || '',
             stripeProductId: plan.stripeProductId || '',
-            features: plan.features || [],
-            limits: plan.limits || {},
-            status: plan.status || 'active'
+            features: plan.features || {
+               pos: true,
+               classes: true,
+               crm: false,
+               checkin: true,
+               reports: true,
+               apiAccess: false,
+            },
+            limits: plan.limits || {
+               maxStaff: 10,
+               maxMembers: 1000,
+               branches: 1,
+            },
+            status: plan.status || 'Active'
          });
       }
    }, [plan, isEditMode]);
