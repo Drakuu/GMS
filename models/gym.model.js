@@ -1,18 +1,15 @@
+// models/Gym.js
 import mongoose from 'mongoose';
-const { Schema, Types } = mongoose;
 
-/**
- * Gym (Tenant). One per company/location (or parent org if multi-branch).
- * Links to a platform SubscriptionPlan and caches limits/features for speed.
- */
-const GymSchema = new Schema(
+const GymSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    subdomain: { type: String, trim: true, lowercase: true, unique: true, sparse: true },
-    // inside GymSchema
-    gym_identifier: { type: String, unique: true, index: true }, // e.g., IFG-4821
-    code: { type: String, trim: true, uppercase: true, unique: true, sparse: true }, // optional short code
+    gym_identifier: { type: String, unique: true, index: true },
+    code: { type: String, trim: true, uppercase: true, unique: true, sparse: true },
 
+    // For multi-branch support
+    is_main_branch: { type: Boolean, default: false },
+    parent_branch: { type: Types.ObjectId, ref: 'Gym', default: null }, // Reference to main branch
 
     ownerUserId: { type: Types.ObjectId, ref: 'User', index: true },
 
@@ -27,27 +24,34 @@ const GymSchema = new Schema(
     timezone: { type: String, default: 'Asia/Karachi' },
     currency: { type: String, default: 'PKR' },
     locale: { type: String, default: 'en-PK' },
-
     status: { type: String, enum: ['Active', 'Suspended', 'Closed'], default: 'Active', index: true },
 
     /** Platform subscription selection + Stripe state */
     subscription: {
       planId: { type: Types.ObjectId, ref: 'SubscriptionPlan', index: true },
-      status: { type: String, enum: ['trialing', 'active', 'past_due', 'canceled', 'incomplete'], default: 'trialing' },
+      status: { type: String, enum: ['trialing', 'active', 'past_due', 'canceled', 'incomplete', 'unpaid'], default: 'trialing' },
       trialEndsAt: { type: Date },
-      stripeCustomerId: { type: String },
-      stripeSubscriptionId: { type: String },
-      stripePriceId: { type: String },
       currentPeriodStart: { type: Date },
       currentPeriodEnd: { type: Date },
+      cancelAtPeriodEnd: { type: Boolean, default: false },
+
+      // Stripe identifiers
+      stripeCustomerId: { type: String, index: true },
+      stripeSubscriptionId: { type: String, index: true },
+      stripePriceId: { type: String },
+
+      // For tracking payment failures
+      latestInvoice: { type: String },
+      paymentFailureCount: { type: Number, default: 0 },
+      lastPaymentError: { type: String },
     },
 
-    /** Cached features/limits from the selected platform plan (can be overridden per gym if needed) */
-    features: {
-      pos: Boolean, classes: Boolean, crm: Boolean, checkin: Boolean, reports: Boolean, apiAccess: Boolean,
-    },
-    limits: {
-      maxStaff: Number, maxMembers: Number, branches: Number,
+    // Track usage against plan limits
+    usage: {
+      members: { type: Number, default: 0 },
+      trainers: { type: Number, default: 0 },
+      branches: { type: Number, default: 0 },
+      lastUpdated: { type: Date, default: Date.now }
     },
 
     notes: String,
@@ -62,7 +66,6 @@ const GymSchema = new Schema(
 
 GymSchema.index({ name: 'text' });
 
-// in gym.model.js
 GymSchema.virtual('ownerUser', {
   ref: 'User',
   localField: 'ownerUserId',
@@ -71,6 +74,11 @@ GymSchema.virtual('ownerUser', {
   options: { select: '_id user_identifier user_name user_email' },
 });
 
-
+// Virtual for child branches
+GymSchema.virtual('childBranches', {
+  ref: 'Gym',
+  localField: '_id',
+  foreignField: 'parent_branch',
+});
 
 export default mongoose.models.Gym || mongoose.model('Gym', GymSchema);

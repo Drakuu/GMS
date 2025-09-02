@@ -68,7 +68,7 @@ export function UserDetailsForm({
             Signing Up...
           </>
         ) : (
-          "Sign Up"
+          "Next"
         )}
       </Button>
     </form>

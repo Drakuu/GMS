@@ -29,26 +29,6 @@ export const signupUser = createAsyncThunk(
   }
 );
 
-export const verifySignup = createAsyncThunk(
-  'auth/verifySignup',
-  async ({ user_email, user_otp }, { rejectWithValue }) => {
-    try {
-      const response = await authApi.verifySignup({ user_email, user_otp });
-
-      const userData = response.user || response.data?.user;
-      const token = response.token || response.data?.token;
-
-      if (!userData) {
-        throw new Error('No user data received');
-      }
-
-      return { user: userData, token };
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
@@ -205,16 +185,6 @@ const authSlice = createSlice({
         state.step = 2;
         state.formData.email = payload.user_email;
         toast.success('OTP sent to your email!');
-      })
-
-      // Verify Signup
-      .addCase(verifySignup.fulfilled, (state, { payload }) => {
-        state.loading = false;
-        state.user = payload.user;
-        state.token = payload.token;
-        state.isAuthenticated = true;
-        state.authChecked = true;
-        toast.success('Account verified successfully!');
       })
 
       // Login

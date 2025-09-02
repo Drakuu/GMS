@@ -1,10 +1,11 @@
+// models/User.js
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   user_identifier: {
     type: String,
     unique: true,
-    sparse: true // Allows null values but ensures uniqueness for non-null values
+    sparse: true
   },
   user_name: { type: String },
   user_email: { type: String, required: true, unique: true, lowercase: true },
@@ -15,7 +16,10 @@ const userSchema = new mongoose.Schema({
     enum: ["SuperAdmin", "Admin", "Trainer", "Member"],
     default: "Member"
   },
+  // Reference to the primary gym (for trainers/members)
   gym_id: { type: mongoose.Schema.Types.ObjectId, ref: "Gym" },
+  // For gym owners/admins who might manage multiple branches
+  managed_gyms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Gym" }],
   user_otp: { type: String, select: false },
   user_otp_expiry: { type: Date, select: false },
   otp_attempts: {
@@ -48,7 +52,6 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// Add pre-save hook to ensure otp_attempts is properly initialized
 userSchema.pre('save', function (next) {
   if (!this.otp_attempts) {
     this.otp_attempts = { count: 0, last_attempt: null };
@@ -57,5 +60,4 @@ userSchema.pre('save', function (next) {
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
-
 export default User;

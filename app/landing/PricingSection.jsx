@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Dumbbell, Users, Trophy, Star, Clock, MapPin, Phone, Mail } from "lucide-react";
+import {  Star } from "lucide-react";
+import Link from "next/link";
 
 const GymLanding = () => {
   return (
@@ -13,10 +14,11 @@ const GymLanding = () => {
         </h2>
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
-            { name: "Basic", price: "$29", features: ["Gym Access", "Locker Room", "Basic Support"] },
-            { name: "Premium", price: "$59", features: ["Everything in Basic", "Group Classes", "Personal Trainer Session"], popular: true },
-            { name: "Elite", price: "$99", features: ["Everything in Premium", "Unlimited PT Sessions", "Nutrition Consultation", "Priority Booking"] },
+            { id:1, name: "Basic", price: "$29", features: ["Gym Access", "Locker Room", "Basic Support"] },
+            { id:2, name: "Premium", price: "$59", features: ["Everything in Basic", "Group Classes", "Personal Trainer Session"], popular: true },
+            { id:3, name: "Elite", price: "$99", features: ["Everything in Premium", "Unlimited PT Sessions", "Nutrition Consultation", "Priority Booking"] },
           ].map((plan, index) => (
+            <Link href="/signup">
             <Card key={index} className={`p-8 relative ${plan.popular ? 'border-primary shadow-glow' : 'border-border'} bg-card`}>
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -42,6 +44,7 @@ const GymLanding = () => {
                 Choose Plan
               </Button>
             </Card>
+            </Link>
           ))}
         </div>
       </div>
